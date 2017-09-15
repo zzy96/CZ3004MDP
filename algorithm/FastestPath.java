@@ -26,10 +26,11 @@ public class FastestPath {
 		direction = RobotConstant.START_DIR;
 	}
 
-	public void run() {
+	public LinkedList<ACTION> run() {
 		actions = new LinkedList<ACTION>();
 		actions.addAll(BFS(direction, RobotConstant.START_ROW, RobotConstant.START_COL, waypointRow, waypointCol));
 		actions.addAll(BFS(direction, waypointRow, waypointCol, RobotConstant.GOAL_ROW, RobotConstant.GOAL_COL));
+		return actions;//SQ CHANGED FROM VOID RETURN TO RETURN LINKEDLIST
 	}
 
 	private LinkedList<ACTION> BFS(DIRECTION startDirection, int startRow, int startCol, int goalRow, int goalCol) {

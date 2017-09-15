@@ -33,6 +33,18 @@ public class Robot {
 
 	}
 
+    public int getRow() {
+        return row;
+    }
+
+    public int getCol() {
+        return col;
+    }
+
+    public DIRECTION getCurDir() {
+        return direction;
+    }
+    
 	public void act(ACTION a) {
 		switch (a) {
 		case FORWARD:
