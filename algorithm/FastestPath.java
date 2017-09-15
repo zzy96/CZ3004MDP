@@ -68,14 +68,15 @@ public class FastestPath {
 		while (states.size() > 0) {
 
 			// for debugging, print queue
-			System.out.println("print states queue:");
-			for (int i = 0; i < states.size(); i++) {
-				System.out.print("direction: " + states.get(i).d);
-				System.out.print(" (" + states.get(i).row + "," + states.get(i).col + ")");
-				System.out.print(" cost: " + states.get(i).cost);
-				printPath(states.get(i).past_actions);
-			}
-			System.out.println();
+			// System.out.println("print states queue:");
+			// for (int i = 0; i < states.size(); i++) {
+			// System.out.print("direction: " + states.get(i).d);
+			// System.out.print(" (" + states.get(i).row + "," +
+			// states.get(i).col + ")");
+			// System.out.print(" cost: " + states.get(i).cost);
+			// printPath(states.get(i).past_actions);
+			// }
+			// System.out.println();
 
 			int min_cost_index = 0;
 			for (int i = 1; i < states.size(); i++) {

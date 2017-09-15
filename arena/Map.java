@@ -37,6 +37,14 @@ public class Map {
 		}
 	}
 
+	public boolean isBlocked(int row, int col) {
+		if (row >= 0 && row < ArenaConstant.ROWS && col >= 0 && col < ArenaConstant.COLS) {
+			return blocked[row][col];
+		} else {
+			return true;
+		}
+	}
+
 	public void notReachable(int row, int col) {
 		reachable[row][col] = false;
 		if (row == ArenaConstant.ROWS - 1) {
