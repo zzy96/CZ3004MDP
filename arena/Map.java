@@ -1,6 +1,7 @@
 package arena;
 
 import java.awt.Color;
+import configuration.RobotConstant.DIRECTION;
 import java.awt.Graphics;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -35,8 +36,11 @@ public class Map extends JPanel { ///SQ ADDED EXTENDS JPANEL FOR SIMULATOR PURPO
 	
 	public boolean[][] reachable;
 	// grid that the robot center can reach
+	
+	Robot bot ;
 
 	public Map(){
+		bot = new Robot(false);
 		blocked = new boolean[ArenaConstant.ROWS][ArenaConstant.COLS];
 		explored = new boolean[ArenaConstant.ROWS][ArenaConstant.COLS];
 		reachable = new boolean[ArenaConstant.ROWS][ArenaConstant.COLS];
@@ -229,11 +233,17 @@ public class Map extends JPanel { ///SQ ADDED EXTENDS JPANEL FOR SIMULATOR PURPO
         return (row <= ArenaConstant.GOAL_ROW + 1 && row >= ArenaConstant.GOAL_ROW - 1 && col <= ArenaConstant.GOAL_COL + 1 && col >= ArenaConstant.GOAL_COL - 1);
     }
     
+    public void setCurrentPosRobot(int row, int col, DIRECTION d){
+    	bot.setRobotPosWithDirection(row, col, d);
+    }
+    
+    public void printRobotPos()
+    {
+    	System.out.println(bot.row + ", " + bot.col + ", " + bot.getRobotCurrentDirection());
+    }
+    
 	//Simulation portion.
     public void paintComponent(Graphics g) {
-    	LinkedList<ACTION> path = new LinkedList<ACTION>();
-    	Simulator s = new Simulator();
-    	path = s.fastestPathDisplay();
     
         // Create a two-dimensional array of _DisplayCell objects for rendering.
         _DisplayCell[][] _mapCells = new _DisplayCell[ArenaConstant.ROWS][ArenaConstant.COLS];
@@ -246,6 +256,7 @@ public class Map extends JPanel { ///SQ ADDED EXTENDS JPANEL FOR SIMULATOR PURPO
         // Paint the cells with the appropriate colors.
         for (int mapRow = 0; mapRow < ArenaConstant.ROWS; mapRow++) {
             for (int mapCol = 0; mapCol < ArenaConstant.COLS; mapCol++) {
+            	
                 Color cellColor;
 
                 //IN START ZONE
@@ -268,20 +279,23 @@ public class Map extends JPanel { ///SQ ADDED EXTENDS JPANEL FOR SIMULATOR PURPO
             }
         }
 
+        //get row, col, direction from simulator. 
+
         // Paint the robot on-screen.
         g.setColor(SimulatorConstant.C_ROBOT);
-        Robot bot = new Robot(false);
+       
         int r = bot.getRow();
         int c = bot.getCol();
-
+        RobotConstant.DIRECTION d = bot.getRobotCurrentDirection(); //nvr hardcode liao first.
+        
+        
+        //robot movement
         g.fillOval((c - 1) * SimulatorConstant.CELL_SIZE + SimulatorConstant.ROBOT_X_OFFSET + SimulatorConstant.MAP_X_OFFSET, SimulatorConstant.MAP_H - (r * ArenaConstant.CELL_SIZE + SimulatorConstant.ROBOT_Y_OFFSET), SimulatorConstant.ROBOT_W, SimulatorConstant.ROBOT_H);
 
+    
         // Paint the robot's direction indicator on-screen.
         g.setColor(SimulatorConstant.C_ROBOT_DIR);
-        
-        RobotConstant.DIRECTION d = bot.getCurDir();
-        
-			//process the linked list and update map.
+			//direction indicator of robot, shows with direction robot is going toward
 	        switch (d) {
             case NORTH:
                 g.fillOval(c * ArenaConstant.CELL_SIZE + 10 + SimulatorConstant.MAP_X_OFFSET, SimulatorConstant.MAP_H - r * ArenaConstant.CELL_SIZE - 15, SimulatorConstant.ROBOT_DIR_W, SimulatorConstant.ROBOT_DIR_H);

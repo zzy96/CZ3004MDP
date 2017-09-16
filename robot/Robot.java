@@ -7,10 +7,11 @@ import configuration.RobotConstant.DIRECTION;
 public class Robot {
 
 	public boolean real;
+	
 	public int row;
 	public int col;
 	public DIRECTION direction;
-	public int speed;
+	
 	public Sensor SFrontLeft; // front-left SR
 	public Sensor SFrontCenter; // front-center SR
 	public Sensor SFrontRight; // front-right SR
@@ -23,7 +24,7 @@ public class Robot {
 		row = RobotConstant.START_ROW;
 		col = RobotConstant.START_COL;
 		direction = RobotConstant.START_DIR;
-		speed = RobotConstant.SPEED;
+		
 		SFrontLeft = new Sensor(0, "SFL");
 		SFrontCenter = new Sensor(0, "SFC");
 		SFrontRight = new Sensor(0, "SFR");
@@ -32,6 +33,7 @@ public class Robot {
 		LLeft = new Sensor(1, "LL");
 
 	}
+	
 
     public int getRow() {
         return row;
@@ -40,9 +42,22 @@ public class Robot {
     public int getCol() {
         return col;
     }
-
-    public DIRECTION getCurDir() {
-        return direction;
+    
+    //update robot position
+    public void setRobotPos(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+    
+   public DIRECTION getRobotCurrentDirection(){
+	   return direction;
+   }
+   
+    
+    public void setRobotPosWithDirection(int row, int col, DIRECTION d) {
+        this.row = row;
+        this.col = col;
+        direction = d;
     }
     
 	public void act(ACTION a) {
