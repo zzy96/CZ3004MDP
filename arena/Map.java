@@ -13,7 +13,7 @@ public class Map {
 	/*
 	 * map layout:
 	 * 
-	 * row . . . 3 2 1 0 * 0 1 2 3 ... column
+	 * 0,0 is at left down corner
 	 * 
 	 */
 

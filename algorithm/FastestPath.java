@@ -14,7 +14,6 @@ public class FastestPath {
 	private int waypointCol;
 	private Map map;
 	private LinkedList<ACTION> actions;
-	private int currentStep;
 	private DIRECTION direction;
 
 	public FastestPath(Map map, int waypointRow, int waypointCol) {
@@ -22,7 +21,6 @@ public class FastestPath {
 		// assume waypoint is reachable
 		this.waypointRow = waypointRow;
 		this.waypointCol = waypointCol;
-		currentStep = 0;
 		direction = RobotConstant.START_DIR;
 	}
 
@@ -250,12 +248,8 @@ public class FastestPath {
 
 	}
 
-	public ACTION nextMove() {
-		if (currentStep < actions.size() - 1) {
-			currentStep++;
-			return actions.get(currentStep - 1);
-		}
-		return null;
+	public LinkedList<ACTION> getPath() {
+		return actions;
 	}
 
 	public void printPath(LinkedList<ACTION> actions) {
