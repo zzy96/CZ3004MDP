@@ -10,6 +10,7 @@ public class SimulatorConstant {
 	public static final Color C_UNEXPLORED = Color.LIGHT_GRAY;
 	public static final Color C_FREE = Color.WHITE;
 	public static final Color C_OBSTACLE = Color.BLACK;
+	public static final Color C_WAYPOINT = Color.RED;
 
 	public static final Color C_ROBOT = Color.RED;
 	public static final Color C_ROBOT_DIR = Color.WHITE;

@@ -101,7 +101,7 @@ public class Robot {
 			// SL
 			map = SLeft.senseSimulation(map, this);
 			// LL
-			// map = LLeft.senseSimulation(map, this);
+			map = LLeft.senseSimulation(map, this);
 		}
 		return map;
 	}
