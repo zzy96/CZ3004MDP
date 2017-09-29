@@ -1,5 +1,6 @@
 package robot;
 
+import arena.Map;
 import configuration.RobotConstant;
 import configuration.RobotConstant.ACTION;
 import configuration.RobotConstant.DIRECTION;
@@ -23,7 +24,6 @@ public class Robot {
 		row = RobotConstant.START_ROW;
 		col = RobotConstant.START_COL;
 		direction = RobotConstant.START_DIR;
-		speed = RobotConstant.SPEED;
 		SFrontLeft = new Sensor(0, "SFL");
 		SFrontCenter = new Sensor(0, "SFC");
 		SFrontRight = new Sensor(0, "SFR");
@@ -69,12 +69,40 @@ public class Robot {
 			break;
 		case RIGHT:
 			direction = DIRECTION.right(direction);
+			break;
 		case LEFT:
 			direction = DIRECTION.left(direction);
+			break;
 		default:
 			System.out.println("ACTION error!");
 			break;
 		}
 
+	}
+
+	public Map updateMap(Map map) {
+		for (int i = row - 1; i <= row + 1; i++) {
+			for (int j = col - 1; j <= col + 1; j++) {
+				map.explored[i][j] = true;
+				map.blocked[i][j] = false;
+			}
+		}
+		if (real) {
+
+		} else {
+			// SFL
+			map = SFrontLeft.senseSimulation(map, this);
+			// SFC
+			map = SFrontCenter.senseSimulation(map, this);
+			// SFR
+			map = SFrontRight.senseSimulation(map, this);
+			// SR
+			map = SRight.senseSimulation(map, this);
+			// SL
+			map = SLeft.senseSimulation(map, this);
+			// LL
+			// map = LLeft.senseSimulation(map, this);
+		}
+		return map;
 	}
 }

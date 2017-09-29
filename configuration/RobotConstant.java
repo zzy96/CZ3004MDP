@@ -14,8 +14,10 @@ public class RobotConstant {
 	public static final int TURN_COST = 20;
 	// cost of RIGHT, LEFT movement
 	public static final int SPEED = 100;
+	public static final int TIMELIMIT = 1000000;
+	public static final int COVERAGE = 100;
 	// delay between movements (ms)
-	public static final DIRECTION START_DIR = DIRECTION.NORTH;
+	public static final DIRECTION START_DIR = DIRECTION.EAST;
 	// start direction
 	public static final int SENSOR_SHORT_RANGE_L = 1;
 	// range of short range sensor (cells)

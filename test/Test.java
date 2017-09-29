@@ -6,12 +6,12 @@ import arena.Map;
 public class Test {
 
 	public static void main(String[] args) {
-		fastestPathTest();
+		loadMapTest();
 	}
 
 	public static void loadMapTest() {
 		Map map = new Map();
-		map.loadMap("MAP1");
+		map.loadMap("Week11");
 		map.printRealMap();
 	}
 
