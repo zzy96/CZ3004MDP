@@ -36,11 +36,7 @@ public class Map {
 			for (int col = 0; col < ArenaConstant.COLS; col++) {
 				blocked[row][col] = false;
 				explored[row][col] = false;
-				if (row == 0 || col == 0 || row == ArenaConstant.ROWS - 1 || col == ArenaConstant.COLS - 1) {
-					reachable[row][col] = false;
-				} else {
-					reachable[row][col] = true;
-				}
+				reachable[row][col] = false;
 			}
 		}
 	}
@@ -141,9 +137,18 @@ public class Map {
 			initialize();
 			String bin = sb.toString();
 			int binPtr = 0;
-			for (int row = ArenaConstant.ROWS - 1; row >= 0; row--) {
+			for (int row = 0; row < ArenaConstant.ROWS; row++) {
 				for (int col = 0; col < ArenaConstant.COLS; col++) {
 					explored[row][col] = true;
+					if (row == 0 || col == 0 || row == ArenaConstant.ROWS - 1 || col == ArenaConstant.COLS - 1) {
+						reachable[row][col] = false;
+					} else {
+						reachable[row][col] = true;
+					}
+				}
+			}
+			for (int row = ArenaConstant.ROWS - 1; row >= 0; row--) {
+				for (int col = 0; col < ArenaConstant.COLS; col++) {
 					if (bin.charAt(binPtr) == '1') {
 						blocked[row][col] = true;
 						notReachable(row, col);

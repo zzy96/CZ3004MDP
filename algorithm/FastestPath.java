@@ -30,7 +30,7 @@ public class FastestPath {
 		actions.addAll(BFS(direction, waypointRow, waypointCol, RobotConstant.GOAL_ROW, RobotConstant.GOAL_COL));
 	}
 
-	private LinkedList<ACTION> BFS(DIRECTION startDirection, int startRow, int startCol, int goalRow, int goalCol) {
+	public LinkedList<ACTION> BFS(DIRECTION startDirection, int startRow, int startCol, int goalRow, int goalCol) {
 
 		// define a State class in the method
 		class State {
@@ -66,15 +66,14 @@ public class FastestPath {
 		while (states.size() > 0) {
 
 			// for debugging, print queue
-			// System.out.println("print states queue:");
-			// for (int i = 0; i < states.size(); i++) {
-			// System.out.print("direction: " + states.get(i).d);
-			// System.out.print(" (" + states.get(i).row + "," +
-			// states.get(i).col + ")");
-			// System.out.print(" cost: " + states.get(i).cost);
-			// printPath(states.get(i).past_actions);
-			// }
-			// System.out.println();
+			System.out.println("print states queue:");
+			for (int i = 0; i < states.size(); i++) {
+				System.out.print("direction: " + states.get(i).d);
+				System.out.print(" (" + states.get(i).row + "," + states.get(i).col + ")");
+				System.out.print(" cost: " + states.get(i).cost);
+				printPath(states.get(i).past_actions);
+			}
+			System.out.println();
 
 			int min_cost_index = 0;
 			for (int i = 1; i < states.size(); i++) {
@@ -90,13 +89,13 @@ public class FastestPath {
 				return state.past_actions;
 			}
 
-			State new_state = new State(state.d, state.row, state.col, state.cost);
-
 			// go north
-			new_state.past_actions.addAll(state.past_actions);
+
 			if (state.row + 1 < ArenaConstant.ROWS && map.reachable[state.row + 1][state.col]
 					&& !queued[state.row + 1][state.col]) {
 
+				State new_state = new State(state.d, state.row, state.col, state.cost);
+				new_state.past_actions.addAll(state.past_actions);
 				new_state.row = state.row + 1;
 				new_state.col = state.col;
 				switch (state.d) {
@@ -115,7 +114,7 @@ public class FastestPath {
 				case SOUTH:
 					new_state.past_actions.add(ACTION.BACKWARD);
 					new_state.cost += RobotConstant.MOVE_COST;
-					new_state.d = DIRECTION.NORTH;
+					new_state.d = DIRECTION.SOUTH;
 					break;
 				case WEST:
 					new_state.past_actions.add(ACTION.RIGHT);
@@ -131,10 +130,11 @@ public class FastestPath {
 			}
 
 			// go east
-			new_state = new State(state.d, state.row, state.col, state.cost);
-			new_state.past_actions.addAll(state.past_actions);
 			if (state.col + 1 < ArenaConstant.COLS && map.reachable[state.row][state.col + 1]
 					&& !queued[state.row][state.col + 1]) {
+
+				State new_state = new State(state.d, state.row, state.col, state.cost);
+				new_state.past_actions.addAll(state.past_actions);
 
 				new_state.row = state.row;
 				new_state.col = state.col + 1;
@@ -161,7 +161,7 @@ public class FastestPath {
 				case WEST:
 					new_state.past_actions.add(ACTION.BACKWARD);
 					new_state.cost += RobotConstant.MOVE_COST;
-					new_state.d = DIRECTION.EAST;
+					new_state.d = DIRECTION.WEST;
 					break;
 				}
 
@@ -170,9 +170,10 @@ public class FastestPath {
 			}
 
 			// go south
-			new_state = new State(state.d, state.row, state.col, state.cost);
-			new_state.past_actions.addAll(state.past_actions);
 			if (state.row - 1 >= 0 && map.reachable[state.row - 1][state.col] && !queued[state.row - 1][state.col]) {
+
+				State new_state = new State(state.d, state.row, state.col, state.cost);
+				new_state.past_actions.addAll(state.past_actions);
 
 				new_state.row = state.row - 1;
 				new_state.col = state.col;
@@ -180,7 +181,7 @@ public class FastestPath {
 				case NORTH:
 					new_state.past_actions.add(ACTION.BACKWARD);
 					new_state.cost += RobotConstant.MOVE_COST;
-					new_state.d = DIRECTION.SOUTH;
+					new_state.d = DIRECTION.NORTH;
 					break;
 				case EAST:
 					new_state.past_actions.add(ACTION.RIGHT);
@@ -208,10 +209,11 @@ public class FastestPath {
 			}
 
 			// go west
-			new_state = new State(state.d, state.row, state.col, state.cost);
-			new_state.past_actions.addAll(state.past_actions);
 
 			if (state.col - 1 >= 0 && map.reachable[state.row][state.col - 1] && !queued[state.row][state.col - 1]) {
+
+				State new_state = new State(state.d, state.row, state.col, state.cost);
+				new_state.past_actions.addAll(state.past_actions);
 
 				new_state.row = state.row;
 				new_state.col = state.col - 1;
@@ -226,7 +228,7 @@ public class FastestPath {
 				case EAST:
 					new_state.past_actions.add(ACTION.BACKWARD);
 					new_state.cost += RobotConstant.MOVE_COST;
-					new_state.d = DIRECTION.WEST;
+					new_state.d = DIRECTION.EAST;
 					break;
 				case SOUTH:
 					new_state.past_actions.add(ACTION.RIGHT);
@@ -241,6 +243,8 @@ public class FastestPath {
 					new_state.d = DIRECTION.WEST;
 					break;
 				}
+				states.add(new_state);
+				queued[new_state.row][new_state.col] = true;
 			}
 		}
 
@@ -266,6 +270,29 @@ public class FastestPath {
 			System.out.print(ACTION.encoding(actions.get(i)) + "--");
 		}
 		System.out.println("END");
+	}
+
+	public static LinkedList<ACTION> reverse(LinkedList<ACTION> actions) {
+		LinkedList<ACTION> reversed = new LinkedList<ACTION>();
+		for (int i = actions.size() - 1; i >= 0; i--) {
+			switch (actions.get(i)) {
+			case FORWARD:
+				reversed.add(ACTION.BACKWARD);
+				break;
+			case BACKWARD:
+				reversed.add(ACTION.FORWARD);
+				break;
+			case LEFT:
+				reversed.add(ACTION.RIGHT);
+				break;
+			case RIGHT:
+				reversed.add(ACTION.LEFT);
+				break;
+			default:
+				break;
+			}
+		}
+		return reversed;
 	}
 
 }

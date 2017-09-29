@@ -54,7 +54,7 @@ public class Simulator {
 		ui.update(map, robot);
 	}
 
-	public void displaySimulator() {
+	public void displaySimulator(String mode) {
 		// initialize main frame
 		_appFrame = new JFrame();
 		_appFrame.setTitle("Robot Simulator");
@@ -78,10 +78,12 @@ public class Simulator {
 		contentPane.add(_buttons, BorderLayout.PAGE_END);
 
 		// Initialize the main map view
-		initMainLayout("FP");
+		initMainLayout(mode);
 
-		// Initialize the buttons
-		initButtonsLayout();
+		if (!robot.real) {
+			// Initialize the buttons
+			initButtonsLayout();
+		}
 
 		// Display the application
 		_appFrame.setVisible(true);
@@ -100,6 +102,7 @@ public class Simulator {
 			_mapCards.add(ui, "REAL_MAP");
 			cl.show(_mapCards, "REAL_MAP");
 		} else {
+			_mapCards.add(ui, "EXPLORATION");
 			cl.show(_mapCards, "EXPLORATION");
 		}
 	}
@@ -273,108 +276,13 @@ public class Simulator {
 				fp = new FastestPath(map, ArenaConstant.WAYPOINT_ROW, ArenaConstant.WAYPOINT_COL);
 				fp.run();
 				actions = fp.getPath();
-				System.out.println(actions.size());
 
 				for (int i = 0; i < actions.size(); i++) {
 
-					switch (actions.get(i)) {
-					case FORWARD:
-						switch (robot.direction) {
-						case NORTH:
-							robot.row += 1;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case SOUTH:
-							robot.row -= 1;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case EAST:
-							robot.col += 1;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case WEST:
-							robot.col -= 1;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						}
-						break;
-					case LEFT:
-						switch (robot.direction) {
-						case NORTH:
-							robot.direction = RobotConstant.DIRECTION.WEST;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case SOUTH:
-							robot.direction = RobotConstant.DIRECTION.EAST;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case EAST:
-							robot.direction = RobotConstant.DIRECTION.NORTH;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case WEST:
-							robot.direction = RobotConstant.DIRECTION.SOUTH;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						}
-						break;
-					case RIGHT:
-						switch (robot.direction) {
-						case NORTH:
-							robot.direction = RobotConstant.DIRECTION.EAST;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case SOUTH:
-							robot.direction = RobotConstant.DIRECTION.WEST;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case EAST:
-							robot.direction = RobotConstant.DIRECTION.SOUTH;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case WEST:
-							robot.direction = RobotConstant.DIRECTION.NORTH;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						}
-						break;
-					case BACKWARD:
-						switch (robot.direction) {
-						case NORTH:
-							robot.row -= 1;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case SOUTH:
-							robot.row += 1;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case EAST:
-							robot.col -= 1;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						case WEST:
-							robot.col += 1;
-							ui.update(map, robot);
-							ui.repaint(100);
-							break;
-						}
-						break;
-					}
+					robot.act(actions.get(i));
+					ui.update(map, robot);
+					ui.repaint(100);
+
 					// lag to make robot looks like moving, delay in MS
 					try {
 						TimeUnit.MILLISECONDS.sleep(speed);
@@ -418,6 +326,48 @@ public class Simulator {
 					}
 					ui.printRobotPos();
 					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL) {
+						if (map.coverage() != 100) {
+							System.out.println(Exploration.hasMore(map));
+							while (Exploration.hasMore(map)) {
+								FastestPath fp;
+								fp = new FastestPath(map, RobotConstant.START_ROW, RobotConstant.START_COL);
+								LinkedList<ACTION> actions = new LinkedList<ACTION>();
+								// go to unexplored
+								actions = fp.BFS(robot.direction, robot.row, robot.col, Exploration.rowToReach,
+										Exploration.colToReach);
+								fp.printPath(actions);
+								for (int i = 0; i < actions.size(); i++) {
+									robot.act(actions.get(i));
+									map = robot.updateMap(map);
+									ui.update(map, robot);
+									ui.repaint(100);
+									// lag to make robot looks like moving,
+									// delay in MS
+									try {
+										TimeUnit.MILLISECONDS.sleep(speed);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+								// go back start
+								actions = FastestPath.reverse(actions);
+								fp.printPath(actions);
+								for (int i = 0; i < actions.size(); i++) {
+									robot.act(actions.get(i));
+									map = robot.updateMap(map);
+									ui.update(map, robot);
+									ui.repaint(100);
+									// lag to make robot looks like moving,
+									// delay in MS
+									try {
+										TimeUnit.MILLISECONDS.sleep(speed);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+
+							}
+						}
 						break;
 					}
 				}

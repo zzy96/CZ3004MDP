@@ -178,8 +178,4 @@ public class Sensor {
 		return map;
 	}
 
-	public int senseReal() {
-		return 0;
-	}
-
 }

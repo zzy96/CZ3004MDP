@@ -88,7 +88,7 @@ public class Robot {
 			}
 		}
 		if (real) {
-
+			// reachable should be defined by exploration
 		} else {
 			// SFL
 			map = SFrontLeft.senseSimulation(map, this);
@@ -105,4 +105,5 @@ public class Robot {
 		}
 		return map;
 	}
+
 }
