@@ -34,7 +34,7 @@ public class Simulator {
 
 	// speed of robot speed put here
 	private static int speed = RobotConstant.SPEED;// default is set to 100ms;
-	private static int timeLimit = RobotConstant.TIMELIMIT;// default is 1000000
+	private static int timeLimit = RobotConstant.TIMELIMIT;// default is 1000000 (need to be in minutes:seconds)
 	private static int coverage = RobotConstant.COVERAGE;// default is 100%
 
 	// JFrame
@@ -140,6 +140,7 @@ public class Simulator {
 							map.loadMap(loadTF.getText());
 							CardLayout cl = ((CardLayout) _mapCards.getLayout());
 							cl.show(_mapCards, "REAL_MAP");
+							
 							ui.repaint();
 						}
 					});
@@ -190,75 +191,84 @@ public class Simulator {
 
 		_buttons.add(btn_ChangeSpeed);
 
+		//Set time limit for exploration
 		JButton btn_SetTimeLimit = new JButton("Time Limit");
 		formatButton(btn_SetTimeLimit);
 
 		btn_SetTimeLimit.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-				JDialog changeSpeedDialog = new JDialog(_appFrame, "Set Time Limit", true);
-				changeSpeedDialog.setSize(400, 200);
-				changeSpeedDialog.setLayout(new GridLayout(0, 1));
-				changeSpeedDialog.setLocation(dim.width / 2 - _appFrame.getSize().width / 2,
+				JDialog changeTimeDialog = new JDialog(_appFrame, "Set Time Limit", true);
+				changeTimeDialog.setSize(400, 200);
+				changeTimeDialog.setLayout(new GridLayout(0, 1));
+				changeTimeDialog.setLocation(dim.width / 2 - _appFrame.getSize().width / 2,
 						dim.height / 2 - _appFrame.getSize().height / 2);
 
-				final JTextField speedTF = new JTextField(15);
-				JButton changeSpeedButton = new JButton("Set Time Limit(ms)");
-				String curSpeedText = "" + timeLimit;
-				JLabel currentSpeed = new JLabel("Current Time Limit: " + curSpeedText + "ms\n");
-				currentSpeed.setVerticalTextPosition(JLabel.BOTTOM);
+				final JTextField timeTF = new JTextField(15);
+				JButton changeTimeButton = new JButton("Set Time Limit(in min:sec)");
+				String curTimeLimit = "" + timeLimit;
+				JLabel currentTime = new JLabel(String.format("%d min:%d sec", 
+					    TimeUnit.MILLISECONDS.toMinutes(Long.valueOf(curTimeLimit).longValue()),
+					    TimeUnit.MILLISECONDS.toSeconds(Long.valueOf(curTimeLimit).longValue()) - 
+					    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(Long.valueOf(curTimeLimit).longValue()))
+					));
+				
+				currentTime.setVerticalTextPosition(JLabel.BOTTOM);
 
-				changeSpeedButton.addMouseListener(new MouseAdapter() {
+				changeTimeButton.addMouseListener(new MouseAdapter() {
 					public void mousePressed(MouseEvent e) {
-						changeSpeedDialog.setVisible(false);
-						timeLimit = Integer.parseInt(speedTF.getText());
-						changeSpeedDialog.dispose();
+						changeTimeDialog.setVisible(false);
+                        String time = timeTF.getText();
+                        String[] timeArr = time.split(":");
+                        timeLimit = (Integer.parseInt(timeArr[0]) * 60000) + (Integer.parseInt(timeArr[1])*1000);
+						changeTimeDialog.dispose();
 					}
 				});
 
-				changeSpeedDialog.add(new JLabel("Time Limit"));
-				changeSpeedDialog.add(speedTF);
-				changeSpeedDialog.add(currentSpeed);
-				changeSpeedDialog.add(changeSpeedButton);
+				changeTimeDialog.add(new JLabel("Time Limit"));
+				changeTimeDialog.add(timeTF);
+				changeTimeDialog.add(currentTime);
+				changeTimeDialog.add(changeTimeButton);
 
-				changeSpeedDialog.setVisible(true);
+				changeTimeDialog.setVisible(true);
 			}
 		});
 
 		_buttons.add(btn_SetTimeLimit);
 
+		//Set coverage for exploration
 		JButton btn_SetCoverage = new JButton("Coverage");
 		formatButton(btn_SetCoverage);
 
 		btn_SetCoverage.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-				JDialog changeSpeedDialog = new JDialog(_appFrame, "Set Coverage Limit", true);
-				changeSpeedDialog.setSize(400, 200);
-				changeSpeedDialog.setLayout(new GridLayout(0, 1));
-				changeSpeedDialog.setLocation(dim.width / 2 - _appFrame.getSize().width / 2,
+				JDialog coverageDialog = new JDialog(_appFrame, "Set Coverage Limit", true);
+				coverageDialog.setSize(400, 200);
+				coverageDialog.setLayout(new GridLayout(0, 1));
+				coverageDialog.setLocation(dim.width / 2 - _appFrame.getSize().width / 2,
 						dim.height / 2 - _appFrame.getSize().height / 2);
 
-				final JTextField speedTF = new JTextField(15);
+				final JTextField coverageTF = new JTextField(15);
 				JButton changeSpeedButton = new JButton("Set Coverage Limit(%)");
-				String curSpeedText = "" + coverage;
-				JLabel currentSpeed = new JLabel("Current Coverage Limit: " + curSpeedText + "%\n");
-				currentSpeed.setVerticalTextPosition(JLabel.BOTTOM);
+				String curCoverage = "" + coverage;
+				JLabel currentCoverage = new JLabel("Current Coverage Limit: " + curCoverage + "%\n");
+				currentCoverage.setVerticalTextPosition(JLabel.BOTTOM);
 
 				changeSpeedButton.addMouseListener(new MouseAdapter() {
 					public void mousePressed(MouseEvent e) {
-						changeSpeedDialog.setVisible(false);
-						coverage = Integer.parseInt(speedTF.getText());
-						changeSpeedDialog.dispose();
+						coverageDialog.setVisible(false);
+						coverage = Integer.parseInt(coverageTF.getText());
+						coverageDialog.dispose();
 					}
 				});
 
-				changeSpeedDialog.add(new JLabel("Time Limit"));
-				changeSpeedDialog.add(speedTF);
-				changeSpeedDialog.add(currentSpeed);
-				changeSpeedDialog.add(changeSpeedButton);
+				coverageDialog.add(new JLabel("Coverage"));
+				coverageDialog.add(coverageTF);
+				coverageDialog.add(currentCoverage);
+				coverageDialog.add(changeSpeedButton);
 
-				changeSpeedDialog.setVisible(true);
+				coverageDialog.setVisible(true);
 			}
 		});
 
@@ -310,11 +320,15 @@ public class Simulator {
 
 		class ExplorationDisplay extends SwingWorker<Integer, String> {
 			protected Integer doInBackground() throws Exception {
-				int time = 0;
+				
+		        long startTime = System.currentTimeMillis();
+		        long endTime = System.currentTimeMillis() + timeLimit;
+
 				map.setUnexplored();
 				robot = new Robot(false);
 				map = robot.updateMap(map);
-				while (time <= timeLimit && map.coverage() <= coverage) {
+				while (System.currentTimeMillis() <= endTime && map.coverage() <= coverage) {
+
 					robot = Exploration.nextMove(map, robot);
 					map = robot.updateMap(map);
 					ui.update(map, robot);
@@ -371,6 +385,10 @@ public class Simulator {
 						break;
 					}
 				}
+				
+				System.out.println("Coverage percentage of exploration: "+map.coverage()+"%");
+				System.out.println("Current Speed: "+speed+"ms");
+		        System.out.println("Time taken: "+(System.currentTimeMillis() - startTime) / 1000 + " Seconds");
 				return 111;
 			}
 		}
