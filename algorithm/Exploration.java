@@ -86,21 +86,7 @@ public class Exploration {
 	}
 
 	public static boolean checkReachable(Map map, int row, int col) {
-		if (row != 0 && row != ArenaConstant.ROWS - 1 && col != 0 && col != ArenaConstant.COLS - 1) {
-			if (map.explored[row - 1][col - 1] && map.explored[row - 1][col] && map.explored[row - 1][col + 1]
-					&& map.explored[row][col - 1] && map.explored[row][col] && map.explored[row][col + 1]
-					&& map.explored[row + 1][col - 1] && map.explored[row + 1][col] && map.explored[row + 1][col + 1]
-					&& !map.blocked[row - 1][col - 1] && !map.blocked[row - 1][col] && !map.blocked[row - 1][col + 1]
-					&& !map.blocked[row][col - 1] && !map.blocked[row][col] && !map.blocked[row][col + 1]
-					&& !map.blocked[row + 1][col - 1] && !map.blocked[row + 1][col] && !map.blocked[row + 1][col + 1]) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
-
+		return map.reachable[row][col];
 	}
 
 	public static boolean canTurnRight(Map map, Robot robot) {

@@ -342,11 +342,12 @@ public class Simulator {
 					ui.printRobotPos();
 					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL) {
 						if (map.coverage() != 100) {
+							FastestPath fp;
+							fp = new FastestPath(map, RobotConstant.START_ROW, RobotConstant.START_COL);
+							LinkedList<ACTION> actions = new LinkedList<ACTION>();
+							LinkedList<ACTION> reverseActions = new LinkedList<ACTION>();
 							System.out.println(Exploration.hasMore(map));
 							while (Exploration.hasMore(map)) {
-								FastestPath fp;
-								fp = new FastestPath(map, RobotConstant.START_ROW, RobotConstant.START_COL);
-								LinkedList<ACTION> actions = new LinkedList<ACTION>();
 								// go to unexplored
 								actions = fp.BFS(robot.direction, robot.row, robot.col, Exploration.rowToReach,
 										Exploration.colToReach);
@@ -364,23 +365,23 @@ public class Simulator {
 										e.printStackTrace();
 									}
 								}
-								// go back start
-								actions = FastestPath.reverse(actions);
-								fp.printPath(actions);
-								for (int i = 0; i < actions.size(); i++) {
-									robot.act(actions.get(i));
-									map = robot.updateMap(map);
-									ui.update(map, robot);
-									ui.repaint(100);
-									// lag to make robot looks like moving,
-									// delay in MS
-									try {
-										TimeUnit.MILLISECONDS.sleep(speed);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
+								reverseActions.addAll(actions);
+							}
+							// go back start
+							reverseActions = FastestPath.reverse(reverseActions);
+							fp.printPath(reverseActions);
+							for (int i = 0; i < reverseActions.size(); i++) {
+								robot.act(reverseActions.get(i));
+								map = robot.updateMap(map);
+								ui.update(map, robot);
+								ui.repaint(100);
+								// lag to make robot looks like moving,
+								// delay in MS
+								try {
+									TimeUnit.MILLISECONDS.sleep(speed);
+								} catch (Exception e) {
+									e.printStackTrace();
 								}
-
 							}
 						}
 						break;

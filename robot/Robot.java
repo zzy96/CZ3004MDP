@@ -1,6 +1,7 @@
 package robot;
 
 import arena.Map;
+import configuration.ArenaConstant;
 import configuration.RobotConstant;
 import configuration.RobotConstant.ACTION;
 import configuration.RobotConstant.DIRECTION;
@@ -88,7 +89,7 @@ public class Robot {
 			}
 		}
 		if (real) {
-			// reachable should be defined by exploration
+			// real sensor update map
 		} else {
 			// SFL
 			map = SFrontLeft.senseSimulation(map, this);
@@ -103,7 +104,24 @@ public class Robot {
 			// LL
 			map = LLeft.senseSimulation(map, this);
 		}
+		map = updateReachable(map);
 		return map;
 	}
 
+	private Map updateReachable(Map map) {
+		for (int row = 1; row < ArenaConstant.ROWS - 1; row++) {
+			for (int col = 1; col < ArenaConstant.COLS - 1; col++) {
+				if (map.explored[row - 1][col - 1] && map.explored[row - 1][col] && map.explored[row - 1][col + 1]
+						&& map.explored[row][col - 1] && map.explored[row][col] && map.explored[row][col + 1]
+						&& map.explored[row + 1][col - 1] && map.explored[row + 1][col]
+						&& map.explored[row + 1][col + 1] && !map.blocked[row - 1][col - 1]
+						&& !map.blocked[row - 1][col] && !map.blocked[row - 1][col + 1] && !map.blocked[row][col - 1]
+						&& !map.blocked[row][col] && !map.blocked[row][col + 1] && !map.blocked[row + 1][col - 1]
+						&& !map.blocked[row + 1][col] && !map.blocked[row + 1][col + 1]) {
+					map.reachable[row][col] = true;
+				}
+			}
+		}
+		return map;
+	}
 }
