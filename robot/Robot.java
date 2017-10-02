@@ -11,6 +11,8 @@ public class Robot {
 	public boolean real;
 	public int row;
 	public int col;
+	public int waypointRow;
+	public int waypointCol;
 	public DIRECTION direction;
 	public int speed;
 	public Sensor SFrontLeft; // front-left SR

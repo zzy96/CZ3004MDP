@@ -25,7 +25,6 @@ import javax.swing.WindowConstants;
 import algorithm.Exploration;
 import algorithm.FastestPath;
 import arena.Map;
-import configuration.ArenaConstant;
 import configuration.RobotConstant;
 import configuration.RobotConstant.ACTION;
 import robot.Robot;
@@ -284,7 +283,11 @@ public class Simulator {
 				robot.direction = RobotConstant.START_DIR;
 
 				FastestPath fp;
-				fp = new FastestPath(map, ArenaConstant.WAYPOINT_ROW, ArenaConstant.WAYPOINT_COL);
+				if (robot.real) {
+					fp = new FastestPath(map, robot.waypointRow, robot.waypointCol);
+				} else {
+					fp = new FastestPath(map, RobotConstant.START_ROW, RobotConstant.START_COL);
+				}
 				fp.run();
 				actions = fp.getPath();
 

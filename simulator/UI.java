@@ -67,8 +67,6 @@ public class UI extends JPanel {
 						cellColor = SimulatorConstant.C_UNEXPLORED;
 					else if (blocked[mapRow][mapCol]) // OBSTACLE
 						cellColor = SimulatorConstant.C_OBSTACLE;
-					else if (mapRow == ArenaConstant.WAYPOINT_ROW && mapCol == ArenaConstant.WAYPOINT_COL)
-						cellColor = SimulatorConstant.C_WAYPOINT;
 					else
 						cellColor = SimulatorConstant.C_FREE;
 				}
