@@ -81,39 +81,50 @@ public class Exploration {
 			robot.act(ACTION.LEFT);
 			preAction = ACTION.LEFT;
 		}
+		System.out.println(preAction);
 		return robot;
+	}
+
+	public static boolean checkReachable(Map map, int row, int col) {
+		if (row != 0 && row != ArenaConstant.ROWS - 1 && col != 0 && col != ArenaConstant.COLS - 1) {
+			if (map.explored[row - 1][col - 1] && map.explored[row - 1][col] && map.explored[row - 1][col + 1]
+					&& map.explored[row][col - 1] && map.explored[row][col] && map.explored[row][col + 1]
+					&& map.explored[row + 1][col - 1] && map.explored[row + 1][col] && map.explored[row + 1][col + 1]
+					&& !map.blocked[row - 1][col - 1] && !map.blocked[row - 1][col] && !map.blocked[row - 1][col + 1]
+					&& !map.blocked[row][col - 1] && !map.blocked[row][col] && !map.blocked[row][col + 1]
+					&& !map.blocked[row + 1][col - 1] && !map.blocked[row + 1][col] && !map.blocked[row + 1][col + 1]) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+
 	}
 
 	public static boolean canTurnRight(Map map, Robot robot) {
 		switch (robot.direction) {
 		case NORTH:
-			if (robot.col + 1 < ArenaConstant.COLS && map.explored[robot.row - 1][robot.col + 1]
-					&& map.explored[robot.row][robot.col + 1] && map.explored[robot.row + 1][robot.col + 1]
-					&& map.reachable[robot.row][robot.col + 1]) {
+			if (robot.col + 1 < ArenaConstant.COLS && checkReachable(map, robot.row, robot.col + 1)) {
 				return true;
 			} else {
 				return false;
 			}
 		case EAST:
-			if (robot.row - 1 > 0 && map.explored[robot.row - 1][robot.col - 1]
-					&& map.explored[robot.row - 1][robot.col] && map.explored[robot.row - 1][robot.col + 1]
-					&& map.reachable[robot.row - 1][robot.col]) {
+			if (robot.row - 1 > 0 && checkReachable(map, robot.row - 1, robot.col)) {
 				return true;
 			} else {
 				return false;
 			}
 		case SOUTH:
-			if (robot.col - 1 > 0 && map.explored[robot.row - 1][robot.col - 1]
-					&& map.explored[robot.row][robot.col - 1] && map.explored[robot.row + 1][robot.col - 1]
-					&& map.reachable[robot.row][robot.col - 1]) {
+			if (robot.col - 1 > 0 && checkReachable(map, robot.row, robot.col - 1)) {
 				return true;
 			} else {
 				return false;
 			}
 		case WEST:
-			if (robot.row + 1 < ArenaConstant.ROWS && map.explored[robot.row + 1][robot.col - 1]
-					&& map.explored[robot.row + 1][robot.col] && map.explored[robot.row + 1][robot.col + 1]
-					&& map.reachable[robot.row + 1][robot.col]) {
+			if (robot.row + 1 < ArenaConstant.ROWS && checkReachable(map, robot.row + 1, robot.col)) {
 				return true;
 			} else {
 				return false;
@@ -125,33 +136,25 @@ public class Exploration {
 	public static boolean canMoveForward(Map map, Robot robot) {
 		switch (robot.direction) {
 		case NORTH:
-			if (robot.row + 1 < ArenaConstant.ROWS && map.explored[robot.row + 1][robot.col - 1]
-					&& map.explored[robot.row + 1][robot.col] && map.explored[robot.row + 1][robot.col + 1]
-					&& map.reachable[robot.row + 1][robot.col]) {
+			if (robot.row + 1 < ArenaConstant.ROWS && checkReachable(map, robot.row + 1, robot.col)) {
 				return true;
 			} else {
 				return false;
 			}
 		case EAST:
-			if (robot.col + 1 < ArenaConstant.COLS && map.explored[robot.row - 1][robot.col + 1]
-					&& map.explored[robot.row][robot.col + 1] && map.explored[robot.row + 1][robot.col + 1]
-					&& map.reachable[robot.row][robot.col + 1]) {
+			if (robot.col + 1 < ArenaConstant.COLS && checkReachable(map, robot.row, robot.col + 1)) {
 				return true;
 			} else {
 				return false;
 			}
 		case SOUTH:
-			if (robot.row - 1 > 0 && map.explored[robot.row - 1][robot.col - 1]
-					&& map.explored[robot.row - 1][robot.col] && map.explored[robot.row - 1][robot.col + 1]
-					&& map.reachable[robot.row - 1][robot.col]) {
+			if (robot.row - 1 > 0 && checkReachable(map, robot.row - 1, robot.col)) {
 				return true;
 			} else {
 				return false;
 			}
 		case WEST:
-			if (robot.col - 1 > 0 && map.explored[robot.row - 1][robot.col - 1]
-					&& map.explored[robot.row][robot.col - 1] && map.explored[robot.row + 1][robot.col - 1]
-					&& map.reachable[robot.row][robot.col - 1]) {
+			if (robot.col - 1 > 0 && checkReachable(map, robot.row, robot.col - 1)) {
 				return true;
 			} else {
 				return false;
