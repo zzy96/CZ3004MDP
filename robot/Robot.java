@@ -21,6 +21,7 @@ public class Robot {
 	public Sensor SLeft; // left SR
 	public Sensor SRight; // right SR
 	public Sensor LLeft; // left LR
+	public String sensorData = "0|0|0|0|0";
 
 	public Robot(boolean real) {
 		this.real = real;
@@ -54,26 +55,14 @@ public class Robot {
 				break;
 			}
 			break;
-		case BACKWARD:
-			switch (direction) {
-			case NORTH:
-				row--;
-				break;
-			case EAST:
-				col--;
-				break;
-			case SOUTH:
-				row++;
-				break;
-			case WEST:
-				col++;
-				break;
-			}
-			break;
 		case RIGHT:
 			direction = DIRECTION.right(direction);
 			break;
 		case LEFT:
+			direction = DIRECTION.left(direction);
+			break;
+		case TURN:
+			direction = DIRECTION.left(direction);
 			direction = DIRECTION.left(direction);
 			break;
 		default:
@@ -92,6 +81,15 @@ public class Robot {
 		}
 		if (real) {
 			// real sensor update map
+			map = SFrontLeft.senseReal(map, this, sensorData);
+			// SFC
+			map = SFrontCenter.senseReal(map, this, sensorData);
+			// SFR
+			map = SFrontRight.senseReal(map, this, sensorData);
+			// SR
+			map = SRight.senseReal(map, this, sensorData);
+			// // LL
+			map = LLeft.senseReal(map, this, sensorData);
 		} else {
 			// SFL
 			map = SFrontLeft.senseSimulation(map, this);

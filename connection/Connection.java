@@ -12,11 +12,11 @@ import java.net.UnknownHostException;
 public class Connection {
 	public static final String EX_START = "EX_START"; // Android --> PC
 	public static final String FP_START = "FP_START"; // Android --> PC
-	public static final String MAP_STRINGS = "MAP"; // PC --> Android
+	public static final String MAP = "MAP"; // PC --> Android
 	public static final String BOT_POS = "BOT_POS"; // PC --> Android
 	public static final String BOT_START = "BOT_START"; // PC --> Arduino
-	public static final String INSTRUCTIONS = "INSTR"; // PC --> Arduino
-	public static final String SENSOR_DATA = "SDATA"; // Arduino --> PC
+	public static final String INSTR = "INSTR"; // PC --> Arduino
+	public static final String SDATA = "SDATA"; // Arduino --> PC
 
 	private static Connection connection = null;
 	private static Socket socket = null;
@@ -27,7 +27,7 @@ public class Connection {
 	private Connection() {
 	}
 
-	public static Connection getCommMgr() {
+	public static Connection getConnection() {
 		if (connection == null) {
 			connection = new Connection();
 		}
@@ -38,8 +38,8 @@ public class Connection {
 		System.out.println("Opening connection...");
 
 		try {
-			String HOST = "192.168.2.1";
-			int PORT = 8008;
+			String HOST = "192.168.28.28";
+			int PORT = 8080;
 			socket = new Socket(HOST, PORT);
 
 			writer = new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(socket.getOutputStream())));
@@ -86,12 +86,12 @@ public class Connection {
 
 		try {
 			String outputMsg;
-			if (msg == null) {
-				outputMsg = msgType + "\n";
-			} else if (msgType.equals(MAP_STRINGS) || msgType.equals(BOT_POS)) {
-				outputMsg = msgType + " " + msg + "\n";
+			if (msgType.equals(INSTR) || msgType.equals(BOT_START)) {
+				outputMsg = "AR" + msg;
+			} else if (msgType.equals(MAP) || msgType.equals(BOT_POS)) {
+				outputMsg = "AN" + "," + msgType + "," + msg;
 			} else {
-				outputMsg = msgType + "\n" + msg + "\n";
+				outputMsg = msg;
 			}
 
 			System.out.println("Sending out message:\n" + outputMsg);
@@ -114,7 +114,7 @@ public class Connection {
 
 			if (input != null && input.length() > 0) {
 				sb.append(input);
-				System.out.println(sb.toString());
+				System.out.println("message received: " + sb.toString());
 				return sb.toString();
 			}
 		} catch (IOException e) {

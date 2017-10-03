@@ -166,7 +166,7 @@ public class Map {
 		return true;
 	}
 
-	public String[] generateMapDescriptor() {
+	public String generateMapDescriptor() {
 		String[] ret = new String[2];
 
 		StringBuilder Part1 = new StringBuilder();
@@ -203,7 +203,7 @@ public class Map {
 		ret[1] = binToHex(Part2.toString());
 		System.out.println("Part2: " + ret[1]);
 
-		return ret;
+		return ret[0] + "," + ret[1];
 	}
 
 	private String binToHex(String bin) {

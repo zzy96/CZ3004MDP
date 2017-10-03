@@ -1,5 +1,6 @@
 package main;
 
+import simulator.RealRunSimulator;
 import simulator.Simulator;
 
 public class Starter {
@@ -8,10 +9,10 @@ public class Starter {
 		boolean realRun = false;
 
 		if (realRun) {
-			Simulator simulator = new Simulator(true);
+			RealRunSimulator simulator = new RealRunSimulator();
 			simulator.displaySimulator("EX");
 		} else {
-			Simulator simulator = new Simulator(false);
+			Simulator simulator = new Simulator();
 			simulator.displaySimulator("FP");
 		}
 

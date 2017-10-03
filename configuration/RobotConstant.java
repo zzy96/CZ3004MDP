@@ -76,18 +76,18 @@ public class RobotConstant {
 	}
 
 	public enum ACTION {
-		FORWARD, BACKWARD, RIGHT, LEFT, CALIBRATE, ERROR;
+		FORWARD, RIGHT, LEFT, TURN;
 
 		public static char encoding(ACTION a) {
 			switch (a) {
 			case FORWARD:
 				return 'F';
-			case BACKWARD:
-				return 'B';
 			case RIGHT:
 				return 'R';
 			case LEFT:
 				return 'L';
+			case TURN:
+				return 'T';
 			default:
 				return 'X';
 			}

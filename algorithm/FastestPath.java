@@ -16,12 +16,12 @@ public class FastestPath {
 	private LinkedList<ACTION> actions;
 	private DIRECTION direction;
 
-	public FastestPath(Map map, int waypointRow, int waypointCol) {
+	public FastestPath(Map map, int waypointRow, int waypointCol, DIRECTION direction) {
 		this.map = map;
 		// assume waypoint is reachable
 		this.waypointRow = waypointRow;
 		this.waypointCol = waypointCol;
-		direction = RobotConstant.START_DIR;
+		this.direction = direction;
 	}
 
 	public void run() {
@@ -89,7 +89,7 @@ public class FastestPath {
 				return state.past_actions;
 			}
 
-			// go north
+			// from any direction to north
 
 			if (state.row + 1 < ArenaConstant.ROWS && map.reachable[state.row + 1][state.col]
 					&& !queued[state.row + 1][state.col]) {
@@ -112,9 +112,11 @@ public class FastestPath {
 					new_state.d = DIRECTION.NORTH;
 					break;
 				case SOUTH:
-					new_state.past_actions.add(ACTION.BACKWARD);
+					new_state.past_actions.add(ACTION.TURN);
+					new_state.cost += RobotConstant.TURN_COST + RobotConstant.TURN_COST / 4;
+					new_state.past_actions.add(ACTION.FORWARD);
 					new_state.cost += RobotConstant.MOVE_COST;
-					new_state.d = DIRECTION.SOUTH;
+					new_state.d = DIRECTION.NORTH;
 					break;
 				case WEST:
 					new_state.past_actions.add(ACTION.RIGHT);
@@ -129,7 +131,7 @@ public class FastestPath {
 				queued[new_state.row][new_state.col] = true;
 			}
 
-			// go east
+			// from any direction to east
 			if (state.col + 1 < ArenaConstant.COLS && map.reachable[state.row][state.col + 1]
 					&& !queued[state.row][state.col + 1]) {
 
@@ -159,9 +161,11 @@ public class FastestPath {
 					new_state.d = DIRECTION.EAST;
 					break;
 				case WEST:
-					new_state.past_actions.add(ACTION.BACKWARD);
+					new_state.past_actions.add(ACTION.TURN);
+					new_state.cost += RobotConstant.TURN_COST + RobotConstant.TURN_COST / 4;
+					new_state.past_actions.add(ACTION.FORWARD);
 					new_state.cost += RobotConstant.MOVE_COST;
-					new_state.d = DIRECTION.WEST;
+					new_state.d = DIRECTION.EAST;
 					break;
 				}
 
@@ -169,7 +173,7 @@ public class FastestPath {
 				queued[new_state.row][new_state.col] = true;
 			}
 
-			// go south
+			// from any direction to south
 			if (state.row - 1 >= 0 && map.reachable[state.row - 1][state.col] && !queued[state.row - 1][state.col]) {
 
 				State new_state = new State(state.d, state.row, state.col, state.cost);
@@ -179,9 +183,11 @@ public class FastestPath {
 				new_state.col = state.col;
 				switch (state.d) {
 				case NORTH:
-					new_state.past_actions.add(ACTION.BACKWARD);
+					new_state.past_actions.add(ACTION.TURN);
+					new_state.cost += RobotConstant.TURN_COST + RobotConstant.TURN_COST / 4;
+					new_state.past_actions.add(ACTION.FORWARD);
 					new_state.cost += RobotConstant.MOVE_COST;
-					new_state.d = DIRECTION.NORTH;
+					new_state.d = DIRECTION.SOUTH;
 					break;
 				case EAST:
 					new_state.past_actions.add(ACTION.RIGHT);
@@ -208,7 +214,7 @@ public class FastestPath {
 				queued[new_state.row][new_state.col] = true;
 			}
 
-			// go west
+			// from any direction to west
 
 			if (state.col - 1 >= 0 && map.reachable[state.row][state.col - 1] && !queued[state.row][state.col - 1]) {
 
@@ -226,9 +232,11 @@ public class FastestPath {
 					new_state.d = DIRECTION.WEST;
 					break;
 				case EAST:
-					new_state.past_actions.add(ACTION.BACKWARD);
+					new_state.past_actions.add(ACTION.TURN);
+					new_state.cost += RobotConstant.TURN_COST + RobotConstant.TURN_COST / 4;
+					new_state.past_actions.add(ACTION.FORWARD);
 					new_state.cost += RobotConstant.MOVE_COST;
-					new_state.d = DIRECTION.EAST;
+					new_state.d = DIRECTION.WEST;
 					break;
 				case SOUTH:
 					new_state.past_actions.add(ACTION.RIGHT);
@@ -277,9 +285,6 @@ public class FastestPath {
 		for (int i = actions.size() - 1; i >= 0; i--) {
 			switch (actions.get(i)) {
 			case FORWARD:
-				reversed.add(ACTION.BACKWARD);
-				break;
-			case BACKWARD:
 				reversed.add(ACTION.FORWARD);
 				break;
 			case LEFT:

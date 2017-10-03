@@ -48,9 +48,9 @@ public class Simulator {
 	public static Map map = null;
 	public static Robot robot = null;
 
-	public Simulator(Boolean real) {
+	public Simulator() {
 		map = new Map();
-		robot = new Robot(real);
+		robot = new Robot(false);
 		ui = new UI();
 		ui.update(map, robot);
 	}
@@ -284,9 +284,10 @@ public class Simulator {
 
 				FastestPath fp;
 				if (robot.real) {
-					fp = new FastestPath(map, robot.waypointRow, robot.waypointCol);
+					fp = new FastestPath(map, robot.waypointRow, robot.waypointCol, RobotConstant.START_DIR);
 				} else {
-					fp = new FastestPath(map, RobotConstant.START_ROW, RobotConstant.START_COL);
+					fp = new FastestPath(map, RobotConstant.START_ROW, RobotConstant.START_COL,
+							RobotConstant.START_DIR);
 				}
 				fp.run();
 				actions = fp.getPath();
@@ -346,7 +347,8 @@ public class Simulator {
 					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL) {
 						if (map.coverage() != 100) {
 							FastestPath fp;
-							fp = new FastestPath(map, RobotConstant.START_ROW, RobotConstant.START_COL);
+							fp = new FastestPath(map, RobotConstant.START_ROW, RobotConstant.START_COL,
+									RobotConstant.START_DIR);
 							LinkedList<ACTION> actions = new LinkedList<ACTION>();
 							LinkedList<ACTION> reverseActions = new LinkedList<ACTION>();
 							System.out.println(Exploration.hasMore(map));
@@ -372,6 +374,7 @@ public class Simulator {
 							}
 							// go back start
 							reverseActions = FastestPath.reverse(reverseActions);
+							reverseActions.add(0, ACTION.TURN);
 							fp.printPath(reverseActions);
 							for (int i = 0; i < reverseActions.size(); i++) {
 								robot.act(reverseActions.get(i));
