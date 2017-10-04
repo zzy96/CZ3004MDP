@@ -13,7 +13,7 @@ public class RobotConstant {
 	// cost of FORWARD, BACKWARD movement
 	public static final int TURN_COST = 20;
 	// cost of RIGHT, LEFT movement
-	public static final int SPEED = 100;
+	public static final int SPEED = 500;
 	public static final int TIMELIMIT = 1000000;
 	public static final int COVERAGE = 100;
 	// delay between movements (ms)

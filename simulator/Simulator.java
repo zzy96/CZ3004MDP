@@ -27,6 +27,7 @@ import algorithm.FastestPath;
 import arena.Map;
 import configuration.RobotConstant;
 import configuration.RobotConstant.ACTION;
+import connection.Connection;
 import robot.Robot;
 
 public class Simulator {
@@ -47,6 +48,7 @@ public class Simulator {
 	private static UI ui = null;
 	public static Map map = null;
 	public static Robot robot = null;
+	private static Connection connection;
 
 	public Simulator() {
 		map = new Map();
@@ -292,6 +294,36 @@ public class Simulator {
 				fp.run();
 				actions = fp.getPath();
 
+				String fpString = "X";
+				int d = 0;
+				for (int i = 0; i < actions.size(); i++) {
+					if (i == actions.size() - 1 && actions.get(i) == ACTION.FORWARD) {
+						d++;
+						if (d >= 10) {
+							fpString = fpString.concat("F" + d);
+						} else {
+							fpString = fpString.concat("F0" + d);
+						}
+						d = 0;
+						break;
+					}
+					if (actions.get(i) == ACTION.FORWARD) {
+						d++;
+					} else if (d > 0) {
+						if (d >= 10) {
+							fpString = fpString.concat("F" + d);
+						} else {
+							fpString = fpString.concat("F0" + d);
+						}
+						d = 0;
+						fpString = fpString.concat("" + ACTION.encoding(actions.get(i)));
+					} else {
+						fpString = fpString.concat("" + ACTION.encoding(actions.get(i)));
+					}
+
+				}
+				System.out.println(fpString);
+
 				for (int i = 0; i < actions.size(); i++) {
 
 					robot.act(actions.get(i));
@@ -324,17 +356,40 @@ public class Simulator {
 		_buttons.add(btn_FastestPath);
 
 		class ExplorationDisplay extends SwingWorker<Integer, String> {
+
+			private void updateAndroid(Map map, Robot robot) {
+				connection.sendMsg(map.generateMapDescriptor(), "MAP");
+				switch (robot.direction) {
+				case EAST:
+					connection.sendMsg(robot.row + "," + robot.col + ",0", "BOT_POS");
+					break;
+				case SOUTH:
+					connection.sendMsg(robot.row + "," + robot.col + ",90", "BOT_POS");
+					break;
+				case WEST:
+					connection.sendMsg(robot.row + "," + robot.col + ",180", "BOT_POS");
+					break;
+				case NORTH:
+					connection.sendMsg(robot.row + "," + robot.col + ",270", "BOT_POS");
+					break;
+				}
+			}
+
 			protected Integer doInBackground() throws Exception {
 
 				long startTime = System.currentTimeMillis();
 				long endTime = System.currentTimeMillis() + timeLimit;
+
+				// for android test
+				// connection = Connection.getConnection();
+				// connection.openConnection();
 
 				map.setUnexplored();
 				robot = new Robot(false);
 				map = robot.updateMap(map);
 				while (System.currentTimeMillis() <= endTime && map.coverage() <= coverage) {
 
-					robot = Exploration.nextMove(map, robot);
+					robot = Exploration.nextMoveOptimized(map, robot);
 					map = robot.updateMap(map);
 					ui.update(map, robot);
 					ui.repaint(100);
@@ -344,6 +399,9 @@ public class Simulator {
 						er.printStackTrace();
 					}
 					ui.printRobotPos();
+
+					// updateAndroid(map, robot);
+
 					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL) {
 						if (map.coverage() != 100) {
 							FastestPath fp;
@@ -369,6 +427,8 @@ public class Simulator {
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
+									ui.printRobotPos();
+									// updateAndroid(map, robot);
 								}
 								reverseActions.addAll(actions);
 							}
@@ -388,6 +448,8 @@ public class Simulator {
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
+								ui.printRobotPos();
+								// updateAndroid(map, robot);
 							}
 						}
 						break;

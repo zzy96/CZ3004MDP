@@ -22,13 +22,7 @@ import connection.Connection;
 import robot.Robot;
 
 public class RealRunSimulator {
-
-	// speed of robot speed put here
-	private static int speed = RobotConstant.SPEED;// default is set to 100ms;
-	private static int timeLimit = RobotConstant.TIMELIMIT;// default is 1000000
-															// (need to be in
-															// minutes:seconds)
-	private static int coverage = RobotConstant.COVERAGE;// default is 100%
+	private static int coverage = RobotConstant.COVERAGE; // default is 100%
 
 	// JFrame
 	private static JFrame _appFrame = null; // application JFrame
@@ -104,6 +98,44 @@ public class RealRunSimulator {
 
 		class RealRunDisplay extends SwingWorker<Integer, String> {
 
+			private void updateDisplay(Map map, Robot robot) {
+				// updateAndroid(map, robot);
+				ui.update(map, robot);
+				ui.repaint(100);
+				ui.printRobotPos();
+			}
+
+			private String generateFpString(LinkedList<ACTION> actions) {
+				String fpString = "X";
+				int d = 0;
+				for (int i = 0; i < actions.size(); i++) {
+					if (i == actions.size() - 1 && actions.get(i) == ACTION.FORWARD) {
+						d++;
+						if (d >= 10) {
+							fpString = fpString.concat("F" + d);
+						} else {
+							fpString = fpString.concat("F0" + d);
+						}
+						d = 0;
+						break;
+					}
+					if (actions.get(i) == ACTION.FORWARD) {
+						d++;
+					} else if (d > 0) {
+						if (d >= 10) {
+							fpString = fpString.concat("F" + d);
+						} else {
+							fpString = fpString.concat("F0" + d);
+						}
+						d = 0;
+						fpString = fpString.concat("" + ACTION.encoding(actions.get(i)));
+					} else {
+						fpString = fpString.concat("" + ACTION.encoding(actions.get(i)));
+					}
+				}
+				return fpString;
+			}
+
 			private void updateAndroid(Map map, Robot robot) {
 				connection.sendMsg(map.generateMapDescriptor(), "MAP");
 				switch (robot.direction) {
@@ -122,10 +154,14 @@ public class RealRunSimulator {
 				}
 			}
 
-			private void updateArduino(ACTION a) {
+			private void updateArduino(ACTION a, int i) {
 				switch (a) {
 				case FORWARD:
-					connection.sendMsg("F", "INSTR");
+					if (i > 10) {
+						connection.sendMsg("F" + i, "INSTR");
+					} else {
+						connection.sendMsg("F0" + i, "INSTR");
+					}
 					break;
 				case LEFT:
 					connection.sendMsg("L", "INSTR");
@@ -152,72 +188,117 @@ public class RealRunSimulator {
 					robot.sensorData = connection.recvMsg();
 					// robot.sensorData = "0|0|0|0|0";
 					map = robot.updateMap(map);
-					// updateAndroid(map, robot);
+					updateDisplay(map, robot);
 
-					ui.update(map, robot);
-					ui.repaint(100);
-					ui.printRobotPos();
+					robot = Exploration.nextMoveOptimized(map, robot);
+					updateArduino(Exploration.preAction, Exploration.instance);
 
-					robot = Exploration.nextMove(map, robot);
-					updateArduino(Exploration.preAction);
-
+					// get back to start
 					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL) {
 						robot.sensorData = connection.recvMsg();
 						map = robot.updateMap(map);
-						ui.update(map, robot);
-						ui.repaint(100);
-						ui.printRobotPos();
+						updateDisplay(map, robot);
 
-						// if (map.coverage() != 100) {
-						// FastestPath fp;
-						// fp = new FastestPath(map, RobotConstant.START_ROW,
-						// RobotConstant.START_COL);
-						// LinkedList<ACTION> actions = new
-						// LinkedList<ACTION>();
-						// LinkedList<ACTION> reverseActions = new
-						// LinkedList<ACTION>();
-						// System.out.println(Exploration.hasMore(map));
-						// while (Exploration.hasMore(map)) {
-						// // go to unexplored
-						// actions = fp.BFS(robot.direction, robot.row,
-						// robot.col, Exploration.rowToReach,
-						// Exploration.colToReach);
-						// fp.printPath(actions);
-						// for (int i = 0; i < actions.size(); i++) {
-						// updateArduino(actions.get(i));
-						// robot.act(actions.get(i));
-						// robot.sensorData = connection.recvMsg();
-						// map = robot.updateMap(map);
-						// ui.update(map, robot);
-						// ui.repaint(100);
-						// // lag to make robot looks like moving,
-						// // delay in MS
-						// try {
-						// TimeUnit.MILLISECONDS.sleep(speed);
-						// } catch (Exception e) {
-						// e.printStackTrace();
-						// }
-						// }
-						// reverseActions.addAll(actions);
-						// }
-						// // go back start
-						// reverseActions = FastestPath.reverse(reverseActions);
-						// reverseActions.add(0, ACTION.TURN);
-						// fp.printPath(reverseActions);
-						// for (int i = 0; i < reverseActions.size(); i++) {
-						// robot.act(reverseActions.get(i));
-						// map = robot.updateMap(map);
-						// ui.update(map, robot);
-						// ui.repaint(100);
-						// // lag to make robot looks like moving,
-						// // delay in MS
-						// try {
-						// TimeUnit.MILLISECONDS.sleep(speed);
-						// } catch (Exception e) {
-						// e.printStackTrace();
-						// }
-						// }
-						// }
+						if (map.coverage() != 100) {
+							// this is bad design, since fp methods are not
+							// static
+							FastestPath fp;
+							fp = new FastestPath(map, RobotConstant.START_ROW, RobotConstant.START_COL,
+									RobotConstant.START_DIR);
+							LinkedList<ACTION> actions = new LinkedList<ACTION>();
+
+							System.out.println(Exploration.hasMore(map));
+							while (Exploration.hasMore(map)) {
+								// go to unexplored
+								actions = fp.BFS(robot.direction, robot.row, robot.col, Exploration.rowToReach,
+										Exploration.colToReach);
+								fp.printPath(actions);
+								ACTION lastAction = actions.removeLast();
+								if (actions.size() != 0) {
+									String fpString = generateFpString(actions);
+									connection.sendMsg(fpString, "INSTR");
+								}
+
+								// update UI in fpString
+								for (int i = 0; i < actions.size(); i++) {
+									robot.act(actions.get(i));
+									updateDisplay(map, robot);
+									try {
+										TimeUnit.MILLISECONDS.sleep(400);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+
+								// last step sense
+								robot.act(lastAction);
+								updateArduino(lastAction, 1);
+								robot.sensorData = connection.recvMsg();
+								map = robot.updateMap(map);
+								// updateAndroid(map, robot);
+								updateDisplay(map, robot);
+
+								// turn around
+								robot.act(ACTION.RIGHT);
+								updateArduino(ACTION.RIGHT, 1);
+								robot.sensorData = connection.recvMsg();
+								map = robot.updateMap(map);
+								// updateAndroid(map, robot);
+								updateDisplay(map, robot);
+								robot.act(ACTION.RIGHT);
+								updateArduino(ACTION.RIGHT, 1);
+								robot.sensorData = connection.recvMsg();
+								map = robot.updateMap(map);
+								// updateAndroid(map, robot);
+								updateDisplay(map, robot);
+								robot.act(ACTION.RIGHT);
+								updateArduino(ACTION.RIGHT, 1);
+								robot.sensorData = connection.recvMsg();
+								map = robot.updateMap(map);
+								// updateAndroid(map, robot);
+								updateDisplay(map, robot);
+
+								// go back original direction
+								robot.act(ACTION.RIGHT);
+								updateArduino(ACTION.RIGHT, 1);
+								robot.sensorData = connection.recvMsg();
+								updateDisplay(map, robot);
+
+								actions.add(lastAction);
+								// reverseActions.addAll(actions);
+							}
+							System.out.println("reverse");
+							// go back start
+
+							actions = fp.BFS(robot.direction, robot.row, robot.col, RobotConstant.START_ROW,
+									RobotConstant.START_COL);
+							fp.printPath(actions);
+							if (actions.size() != 0) {
+								String fpString = generateFpString(actions);
+								connection.sendMsg(fpString, "INSTR");
+							}
+
+							// reverseActions =
+							// FastestPath.reverse(reverseActions);
+							// reverseActions.add(0, ACTION.TURN);
+							// fp.printPath(reverseActions);
+							// String fpString =
+							// generateFpString(reverseActions);
+							// connection.sendMsg(fpString, "INSTR");
+
+							// display go home
+							for (int i = 0; i < actions.size(); i++) {
+								robot.act(actions.get(i));
+								updateDisplay(map, robot);
+								// lag to make robot looks like moving,
+								// delay in MS
+								try {
+									TimeUnit.MILLISECONDS.sleep(400);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						}
 						break;
 					}
 				}
@@ -225,41 +306,34 @@ public class RealRunSimulator {
 				System.out.println("Coverage percentage of exploration: " + map.coverage() + "%");
 
 				// start fastest path after exploration
+				connection.sendMsg("C", "INSTR");
+				updateDisplay(map, robot);
+
+				try {
+					TimeUnit.MILLISECONDS.sleep(10000);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 
 				LinkedList<ACTION> actions = new LinkedList<ACTION>();
 				FastestPath fp;
 
-				connection.sendMsg("XC", "INSTR");
 				// hard coded way point 6,6
-				fp = new FastestPath(map, 6, 6, RobotConstant.START_DIR);
+				fp = new FastestPath(map, 17, 4, RobotConstant.START_DIR);
+				robot.direction = RobotConstant.START_DIR;
 				fp.run();
 				actions = fp.getPath();
 				fp.printPath();
-				String fpString = "ARX";
-				int d = 0;
-				for (int i = 0; i < actions.size(); i++) {
-					if (actions.get(i) == ACTION.FORWARD) {
-						d++;
-					} else if (d > 0) {
-						if (d >= 10) {
-							fpString.concat("F" + d);
-						} else {
-							fpString.concat("F0" + d);
-						}
-						fpString.concat("" + ACTION.encoding(actions.get(i)));
-					} else {
-						fpString.concat("" + ACTION.encoding(actions.get(i)));
-					}
 
-				}
+				String fpString = generateFpString(actions);
+				System.out.println(fpString);
+				connection.sendMsg(fpString, "INSTR");
 
 				for (int i = 0; i < actions.size(); i++) {
 					robot.act(actions.get(i));
-					ui.update(map, robot);
-					ui.repaint(100);
-					ui.printRobotPos();
+					updateDisplay(map, robot);
 					try {
-						TimeUnit.MILLISECONDS.sleep(100);
+						TimeUnit.MILLISECONDS.sleep(400);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
