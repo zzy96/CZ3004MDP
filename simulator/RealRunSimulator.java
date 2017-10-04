@@ -214,6 +214,10 @@ public class RealRunSimulator {
 										Exploration.colToReach);
 								fp.printPath(actions);
 								ACTION lastAction = actions.removeLast();
+								ACTION secondLastAction = null;
+								if (actions.size() != 0) {
+									secondLastAction = actions.removeLast();
+								}
 								if (actions.size() != 0) {
 									String fpString = generateFpString(actions);
 									connection.sendMsg(fpString, "INSTR");
@@ -230,6 +234,14 @@ public class RealRunSimulator {
 									}
 								}
 
+								// second last step sense
+								robot.act(secondLastAction);
+								updateArduino(secondLastAction, 1);
+								robot.sensorData = connection.recvMsg();
+								map = robot.updateMap(map);
+								// updateAndroid(map, robot);
+								updateDisplay(map, robot);
+
 								// last step sense
 								robot.act(lastAction);
 								updateArduino(lastAction, 1);
@@ -238,34 +250,8 @@ public class RealRunSimulator {
 								// updateAndroid(map, robot);
 								updateDisplay(map, robot);
 
-								// turn around
-								robot.act(ACTION.RIGHT);
-								updateArduino(ACTION.RIGHT, 1);
-								robot.sensorData = connection.recvMsg();
-								map = robot.updateMap(map);
-								// updateAndroid(map, robot);
-								updateDisplay(map, robot);
-								robot.act(ACTION.RIGHT);
-								updateArduino(ACTION.RIGHT, 1);
-								robot.sensorData = connection.recvMsg();
-								map = robot.updateMap(map);
-								// updateAndroid(map, robot);
-								updateDisplay(map, robot);
-								robot.act(ACTION.RIGHT);
-								updateArduino(ACTION.RIGHT, 1);
-								robot.sensorData = connection.recvMsg();
-								map = robot.updateMap(map);
-								// updateAndroid(map, robot);
-								updateDisplay(map, robot);
-
-								// go back original direction
-								robot.act(ACTION.RIGHT);
-								updateArduino(ACTION.RIGHT, 1);
-								robot.sensorData = connection.recvMsg();
-								updateDisplay(map, robot);
-
+								actions.add(secondLastAction);
 								actions.add(lastAction);
-								// reverseActions.addAll(actions);
 							}
 							System.out.println("reverse");
 							// go back start
@@ -277,14 +263,6 @@ public class RealRunSimulator {
 								String fpString = generateFpString(actions);
 								connection.sendMsg(fpString, "INSTR");
 							}
-
-							// reverseActions =
-							// FastestPath.reverse(reverseActions);
-							// reverseActions.add(0, ACTION.TURN);
-							// fp.printPath(reverseActions);
-							// String fpString =
-							// generateFpString(reverseActions);
-							// connection.sendMsg(fpString, "INSTR");
 
 							// display go home
 							for (int i = 0; i < actions.size(); i++) {

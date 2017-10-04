@@ -408,7 +408,6 @@ public class Simulator {
 							fp = new FastestPath(map, RobotConstant.START_ROW, RobotConstant.START_COL,
 									RobotConstant.START_DIR);
 							LinkedList<ACTION> actions = new LinkedList<ACTION>();
-							LinkedList<ACTION> reverseActions = new LinkedList<ACTION>();
 							System.out.println(Exploration.hasMore(map));
 							while (Exploration.hasMore(map)) {
 								// go to unexplored
@@ -430,14 +429,13 @@ public class Simulator {
 									ui.printRobotPos();
 									// updateAndroid(map, robot);
 								}
-								reverseActions.addAll(actions);
 							}
 							// go back start
-							reverseActions = FastestPath.reverse(reverseActions);
-							reverseActions.add(0, ACTION.TURN);
-							fp.printPath(reverseActions);
-							for (int i = 0; i < reverseActions.size(); i++) {
-								robot.act(reverseActions.get(i));
+							actions = fp.BFS(robot.direction, robot.row, robot.col, RobotConstant.START_ROW,
+									RobotConstant.START_COL);
+							fp.printPath(actions);
+							for (int i = 0; i < actions.size(); i++) {
+								robot.act(actions.get(i));
 								map = robot.updateMap(map);
 								ui.update(map, robot);
 								ui.repaint(100);
