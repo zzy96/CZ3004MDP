@@ -277,12 +277,34 @@ public class Simulator {
 		_buttons.add(btn_SetCoverage);
 
 		class FastestPathDisplay extends SwingWorker<Integer, String> {
+
+			private void updateAndroid(Map map, Robot robot) {
+				switch (robot.direction) {
+				case EAST:
+					connection.sendMsg(robot.row + "," + robot.col + ",0," + map.generateMapDescriptor(), "BOT_POS");
+					break;
+				case SOUTH:
+					connection.sendMsg(robot.row + "," + robot.col + ",90," + map.generateMapDescriptor(), "BOT_POS");
+					break;
+				case WEST:
+					connection.sendMsg(robot.row + "," + robot.col + ",180," + map.generateMapDescriptor(), "BOT_POS");
+					break;
+				case NORTH:
+					connection.sendMsg(robot.row + "," + robot.col + ",270," + map.generateMapDescriptor(), "BOT_POS");
+					break;
+				}
+			}
+
 			protected Integer doInBackground() throws Exception {
 
 				LinkedList<ACTION> actions = new LinkedList<ACTION>();
 				robot.row = RobotConstant.START_ROW;
 				robot.col = RobotConstant.START_COL;
 				robot.direction = RobotConstant.START_DIR;
+
+				// for android test
+				connection = Connection.getConnection();
+				connection.openConnection();
 
 				FastestPath fp;
 				if (robot.real) {
@@ -329,6 +351,7 @@ public class Simulator {
 					robot.act(actions.get(i));
 					ui.update(map, robot);
 					ui.repaint(100);
+					updateAndroid(map, robot);
 
 					// lag to make robot looks like moving, delay in MS
 					try {
@@ -358,19 +381,18 @@ public class Simulator {
 		class ExplorationDisplay extends SwingWorker<Integer, String> {
 
 			private void updateAndroid(Map map, Robot robot) {
-				connection.sendMsg(map.generateMapDescriptor(), "MAP");
 				switch (robot.direction) {
 				case EAST:
-					connection.sendMsg(robot.row + "," + robot.col + ",0", "BOT_POS");
+					connection.sendMsg(robot.row + "," + robot.col + ",0," + map.generateMapDescriptor(), "BOT_POS");
 					break;
 				case SOUTH:
-					connection.sendMsg(robot.row + "," + robot.col + ",90", "BOT_POS");
+					connection.sendMsg(robot.row + "," + robot.col + ",90," + map.generateMapDescriptor(), "BOT_POS");
 					break;
 				case WEST:
-					connection.sendMsg(robot.row + "," + robot.col + ",180", "BOT_POS");
+					connection.sendMsg(robot.row + "," + robot.col + ",180," + map.generateMapDescriptor(), "BOT_POS");
 					break;
 				case NORTH:
-					connection.sendMsg(robot.row + "," + robot.col + ",270", "BOT_POS");
+					connection.sendMsg(robot.row + "," + robot.col + ",270," + map.generateMapDescriptor(), "BOT_POS");
 					break;
 				}
 			}
@@ -381,8 +403,8 @@ public class Simulator {
 				long endTime = System.currentTimeMillis() + timeLimit;
 
 				// for android test
-				// connection = Connection.getConnection();
-				// connection.openConnection();
+				connection = Connection.getConnection();
+				connection.openConnection();
 
 				map.setUnexplored();
 				robot = new Robot(false);
@@ -400,7 +422,7 @@ public class Simulator {
 					}
 					ui.printRobotPos();
 
-					// updateAndroid(map, robot);
+					updateAndroid(map, robot);
 
 					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL) {
 						if (map.coverage() != 100) {

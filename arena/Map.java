@@ -183,7 +183,7 @@ public class Map {
 
 		Part1.append("11");
 		ret[0] = binToHex(Part1.toString());
-		System.out.println("Part1: " + ret[0]);
+		// System.out.println("Part1: " + ret[0]);
 
 		StringBuilder Part2 = new StringBuilder();
 		for (int r = 0; r < ArenaConstant.ROWS; r++) {
@@ -201,7 +201,7 @@ public class Map {
 		}
 
 		ret[1] = binToHex(Part2.toString());
-		System.out.println("Part2: " + ret[1]);
+		// System.out.println("Part2: " + ret[1]);
 
 		return ret[0] + "," + ret[1];
 	}
@@ -217,7 +217,9 @@ public class Map {
 			pointer += 4;
 		}
 		partial = bin.substring(pointer, bin.length());
-		ret = ret.concat(Integer.toHexString(Integer.parseInt(partial, 2)));
+		if (!partial.equals("")) {
+			ret = ret.concat(Integer.toHexString(Integer.parseInt(partial, 2)));
+		}
 		return ret;
 	}
 

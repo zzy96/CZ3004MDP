@@ -6,7 +6,7 @@ import simulator.Simulator;
 public class Starter {
 	public static void main(String[] args) {
 
-		boolean realRun = false;
+		boolean realRun = true;
 
 		if (realRun) {
 			RealRunSimulator simulator = new RealRunSimulator();

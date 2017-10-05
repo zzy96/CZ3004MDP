@@ -98,15 +98,23 @@ public class RealRunSimulator {
 
 		class RealRunDisplay extends SwingWorker<Integer, String> {
 
+			private void delay(int time) {
+				try {
+					TimeUnit.MILLISECONDS.sleep(time);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
 			private void updateDisplay(Map map, Robot robot) {
-				// updateAndroid(map, robot);
+				updateAndroid(map, robot);
 				ui.update(map, robot);
 				ui.repaint(100);
 				ui.printRobotPos();
 			}
 
-			private String generateFpString(LinkedList<ACTION> actions) {
-				String fpString = "X";
+			private String generateFpString(LinkedList<ACTION> actions, String prefix) {
+				String fpString = prefix;
 				int d = 0;
 				for (int i = 0; i < actions.size(); i++) {
 					if (i == actions.size() - 1 && actions.get(i) == ACTION.FORWARD) {
@@ -137,19 +145,18 @@ public class RealRunSimulator {
 			}
 
 			private void updateAndroid(Map map, Robot robot) {
-				connection.sendMsg(map.generateMapDescriptor(), "MAP");
 				switch (robot.direction) {
 				case EAST:
-					connection.sendMsg(robot.row + "," + robot.col + "0", "BOT_POS");
+					connection.sendMsg(robot.row + "," + robot.col + ",0," + map.generateMapDescriptor(), "BOT_POS");
 					break;
 				case SOUTH:
-					connection.sendMsg(robot.row + "," + robot.col + "90", "BOT_POS");
+					connection.sendMsg(robot.row + "," + robot.col + ",90," + map.generateMapDescriptor(), "BOT_POS");
 					break;
 				case WEST:
-					connection.sendMsg(robot.row + "," + robot.col + "180", "BOT_POS");
+					connection.sendMsg(robot.row + "," + robot.col + ",180," + map.generateMapDescriptor(), "BOT_POS");
 					break;
 				case NORTH:
-					connection.sendMsg(robot.row + "," + robot.col + "270", "BOT_POS");
+					connection.sendMsg(robot.row + "," + robot.col + ",270," + map.generateMapDescriptor(), "BOT_POS");
 					break;
 				}
 			}
@@ -180,6 +187,15 @@ public class RealRunSimulator {
 				// initialization
 				map.setUnexplored();
 				robot = new Robot(true);
+
+				while (true) {
+					System.out.println("waiting for EX_START");
+					// start from android
+					if (connection.recvMsg().equals("EX_START")) {
+						System.out.println("EX_START received");
+						break;
+					}
+				}
 
 				// send start command
 				connection.sendMsg("S", "BOT_START");
@@ -219,7 +235,7 @@ public class RealRunSimulator {
 									secondLastAction = actions.removeLast();
 								}
 								if (actions.size() != 0) {
-									String fpString = generateFpString(actions);
+									String fpString = generateFpString(actions, "Z");
 									connection.sendMsg(fpString, "INSTR");
 								}
 
@@ -227,27 +243,23 @@ public class RealRunSimulator {
 								for (int i = 0; i < actions.size(); i++) {
 									robot.act(actions.get(i));
 									updateDisplay(map, robot);
-									try {
-										TimeUnit.MILLISECONDS.sleep(400);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
+									delay(300);
 								}
 
 								// second last step sense
-								robot.act(secondLastAction);
-								updateArduino(secondLastAction, 1);
-								robot.sensorData = connection.recvMsg();
-								map = robot.updateMap(map);
-								// updateAndroid(map, robot);
-								updateDisplay(map, robot);
+								if (secondLastAction != null) {
+									robot.act(secondLastAction);
+									updateArduino(secondLastAction, 1);
+									robot.sensorData = connection.recvMsg();
+									map = robot.updateMap(map);
+									updateDisplay(map, robot);
+								}
 
 								// last step sense
 								robot.act(lastAction);
 								updateArduino(lastAction, 1);
 								robot.sensorData = connection.recvMsg();
 								map = robot.updateMap(map);
-								// updateAndroid(map, robot);
 								updateDisplay(map, robot);
 
 								actions.add(secondLastAction);
@@ -260,7 +272,7 @@ public class RealRunSimulator {
 									RobotConstant.START_COL);
 							fp.printPath(actions);
 							if (actions.size() != 0) {
-								String fpString = generateFpString(actions);
+								String fpString = generateFpString(actions, "Z");
 								connection.sendMsg(fpString, "INSTR");
 							}
 
@@ -270,11 +282,7 @@ public class RealRunSimulator {
 								updateDisplay(map, robot);
 								// lag to make robot looks like moving,
 								// delay in MS
-								try {
-									TimeUnit.MILLISECONDS.sleep(400);
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
+								delay(300);
 							}
 						}
 						break;
@@ -285,36 +293,47 @@ public class RealRunSimulator {
 
 				// start fastest path after exploration
 				connection.sendMsg("C", "INSTR");
-				updateDisplay(map, robot);
+				String waypoint[];
 
-				try {
-					TimeUnit.MILLISECONDS.sleep(10000);
-				} catch (Exception e) {
-					e.printStackTrace();
+				while (true) {
+					System.out.println("waiting for waypoint...");
+					// start from android
+					String msg = connection.recvMsg();
+					if (msg.matches("[0-9]+,[0-9]+")) {
+						waypoint = msg.split(",");
+						System.out.println("waypoint: (" + waypoint[0] + "," + waypoint[1] + ")");
+						break;
+					}
+				}
+
+				while (true) {
+					System.out.println("waiting for FP_START...");
+					// start from android
+					if (connection.recvMsg().equals("FP_START")) {
+						System.out.println("FP_START received");
+						break;
+					}
 				}
 
 				LinkedList<ACTION> actions = new LinkedList<ACTION>();
 				FastestPath fp;
 
-				// hard coded way point 6,6
-				fp = new FastestPath(map, 17, 4, RobotConstant.START_DIR);
+				// hard coded way point
+				fp = new FastestPath(map, Integer.parseInt(waypoint[0]), Integer.parseInt(waypoint[1]),
+						RobotConstant.START_DIR);
 				robot.direction = RobotConstant.START_DIR;
 				fp.run();
 				actions = fp.getPath();
 				fp.printPath();
 
-				String fpString = generateFpString(actions);
+				String fpString = generateFpString(actions, "X");
 				System.out.println(fpString);
 				connection.sendMsg(fpString, "INSTR");
 
 				for (int i = 0; i < actions.size(); i++) {
 					robot.act(actions.get(i));
 					updateDisplay(map, robot);
-					try {
-						TimeUnit.MILLISECONDS.sleep(400);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+					delay(300);
 				}
 
 				return 111;
@@ -328,27 +347,5 @@ public class RealRunSimulator {
 		cl.show(_mapCards, "EXPLORATION");
 		new RealRunDisplay().execute();
 
-		// while (true)
-		// {
-		// String message = "EX_START";
-		// // System.out.println(connection.isConnected());
-		// // while (message == null) {
-		// // message = connection.recvMsg();
-		// // }
-		// // System.out.println(message);
-		//
-		// if (message.equals("EX_START")) {
-		// System.out.println("exploration start");
-		// CardLayout cl = ((CardLayout) _mapCards.getLayout());
-		// cl.show(_mapCards, "EXPLORATION");
-		// new ExplorationDisplay().execute();
-		// break;
-		// } else if (message == "FP_START") {
-		// System.out.println("fastest path start");
-		// CardLayout cl = ((CardLayout) _mapCards.getLayout());
-		// cl.show(_mapCards, "REAL_MAP");
-		// new FastestPathDisplay().execute();
-		// }
-		// }
 	}
 }

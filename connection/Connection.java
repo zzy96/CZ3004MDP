@@ -87,9 +87,9 @@ public class Connection {
 		try {
 			String outputMsg;
 			if (msgType.equals(INSTR) || msgType.equals(BOT_START)) {
-				outputMsg = "AR" + msg;
+				outputMsg = "AR" + msg + "\n";
 			} else if (msgType.equals(MAP) || msgType.equals(BOT_POS)) {
-				outputMsg = "AN" + "," + msgType + "," + msg;
+				outputMsg = "AN" + "," + msg + "\n";
 			} else {
 				outputMsg = msg;
 			}

@@ -8,9 +8,9 @@ import connection.Connection;
 public class Test {
 
 	public static void main(String[] args) {
-		System.out.println(hexToBin("fff"));
-		System.out.println(hexToBin("00f"));
-		System.out.println(hexToBin("03afc"));
+		System.out.println(",7".matches("[0-9]+,[0-9]+"));
+		System.out.println("a,7".matches("[0-9]+,[0-9]+"));
+		System.out.println("5,13".matches("[0-9]+,[0-9]+"));
 	}
 
 	private static String hexToBin(String hex) {
@@ -95,10 +95,11 @@ public class Test {
 		map.printRealMap();
 	}
 
-	public static void generateMapDescriptorTest() {
+	public static String generateMapDescriptorTest() {
 		Map map = new Map();
 		map.loadMap("MAP1");
-		map.generateMapDescriptor();
+		map.setUnexplored();
+		return map.generateMapDescriptor();
 	}
 
 	public static void fastestPathTest() {
