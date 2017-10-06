@@ -8,9 +8,22 @@ import connection.Connection;
 public class Test {
 
 	public static void main(String[] args) {
-		System.out.println(",7".matches("[0-9]+,[0-9]+"));
-		System.out.println("a,7".matches("[0-9]+,[0-9]+"));
-		System.out.println("5,13".matches("[0-9]+,[0-9]+"));
+		Connection connection = Connection.getConnection();
+		connection.openConnection();
+		connection.sendMsg("ZLF03RF02", "INSTR");
+		// try {
+		// TimeUnit.MILLISECONDS.sleep(1000);
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		connection.sendMsg("F01", "INSTR");
+		connection.recvMsg();
+		connection.sendMsg("L", "INSTR");
+		// connection.sendMsg("abc", "BOT_POS");
+		// connection.sendMsg("hello", "BOT_POS");
+		// connection.sendMsg("hi", "BOT_POS");
+
+		connection.recvMsg();
 	}
 
 	private static String hexToBin(String hex) {

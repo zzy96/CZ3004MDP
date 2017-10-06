@@ -164,7 +164,7 @@ public class RealRunSimulator {
 			private void updateArduino(ACTION a, int i) {
 				switch (a) {
 				case FORWARD:
-					if (i > 10) {
+					if (i >= 10) {
 						connection.sendMsg("F" + i, "INSTR");
 					} else {
 						connection.sendMsg("F0" + i, "INSTR");
@@ -188,14 +188,14 @@ public class RealRunSimulator {
 				map.setUnexplored();
 				robot = new Robot(true);
 
-				while (true) {
-					System.out.println("waiting for EX_START");
-					// start from android
-					if (connection.recvMsg().equals("EX_START")) {
-						System.out.println("EX_START received");
-						break;
-					}
-				}
+				// while (true) {
+				// System.out.println("waiting for EX_START");
+				// // start from android
+				// if (connection.recvMsg().equals("EX_START")) {
+				// System.out.println("EX_START received");
+				// break;
+				// }
+				// }
 
 				// send start command
 				connection.sendMsg("S", "BOT_START");
@@ -211,6 +211,11 @@ public class RealRunSimulator {
 
 					// get back to start
 					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL) {
+
+						if (map.coverage() < 50) {
+							continue;
+						}
+
 						robot.sensorData = connection.recvMsg();
 						map = robot.updateMap(map);
 						updateDisplay(map, robot);
@@ -293,27 +298,31 @@ public class RealRunSimulator {
 
 				// start fastest path after exploration
 				connection.sendMsg("C", "INSTR");
-				String waypoint[];
+				String waypoint[] = new String[2];
+				waypoint[0] = "10";
+				waypoint[1] = "4";
+				delay(10000);
 
-				while (true) {
-					System.out.println("waiting for waypoint...");
-					// start from android
-					String msg = connection.recvMsg();
-					if (msg.matches("[0-9]+,[0-9]+")) {
-						waypoint = msg.split(",");
-						System.out.println("waypoint: (" + waypoint[0] + "," + waypoint[1] + ")");
-						break;
-					}
-				}
-
-				while (true) {
-					System.out.println("waiting for FP_START...");
-					// start from android
-					if (connection.recvMsg().equals("FP_START")) {
-						System.out.println("FP_START received");
-						break;
-					}
-				}
+				// while (true) {
+				// System.out.println("waiting for waypoint...");
+				// // start from android
+				// String msg = connection.recvMsg();
+				// if (msg.matches("[0-9]+,[0-9]+")) {
+				// waypoint = msg.split(",");
+				// System.out.println("waypoint: (" + waypoint[0] + "," +
+				// waypoint[1] + ")");
+				// break;
+				// }
+				// }
+				//
+				// while (true) {
+				// System.out.println("waiting for FP_START...");
+				// // start from android
+				// if (connection.recvMsg().equals("FP_START")) {
+				// System.out.println("FP_START received");
+				// break;
+				// }
+				// }
 
 				LinkedList<ACTION> actions = new LinkedList<ACTION>();
 				FastestPath fp;
