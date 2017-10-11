@@ -433,7 +433,7 @@ public class Simulator {
 							System.out.println(Exploration.hasMore(map));
 							while (Exploration.hasMore(map)) {
 								// go to unexplored
-								actions = fp.BFS(robot.direction, robot.row, robot.col, Exploration.rowToReach,
+								actions = fp.UCS(robot.direction, robot.row, robot.col, Exploration.rowToReach,
 										Exploration.colToReach);
 								fp.printPath(actions);
 								for (int i = 0; i < actions.size(); i++) {
@@ -453,7 +453,7 @@ public class Simulator {
 								}
 							}
 							// go back start
-							actions = fp.BFS(robot.direction, robot.row, robot.col, RobotConstant.START_ROW,
+							actions = fp.UCS(robot.direction, robot.row, robot.col, RobotConstant.START_ROW,
 									RobotConstant.START_COL);
 							fp.printPath(actions);
 							for (int i = 0; i < actions.size(); i++) {

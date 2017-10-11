@@ -26,11 +26,11 @@ public class FastestPath {
 
 	public void run() {
 		actions = new LinkedList<ACTION>();
-		actions.addAll(BFS(direction, RobotConstant.START_ROW, RobotConstant.START_COL, waypointRow, waypointCol));
-		actions.addAll(BFS(direction, waypointRow, waypointCol, RobotConstant.GOAL_ROW, RobotConstant.GOAL_COL));
+		actions.addAll(UCS(direction, RobotConstant.START_ROW, RobotConstant.START_COL, waypointRow, waypointCol));
+		actions.addAll(UCS(direction, waypointRow, waypointCol, RobotConstant.GOAL_ROW, RobotConstant.GOAL_COL));
 	}
 
-	public LinkedList<ACTION> BFS(DIRECTION startDirection, int startRow, int startCol, int goalRow, int goalCol) {
+	public LinkedList<ACTION> UCS(DIRECTION startDirection, int startRow, int startCol, int goalRow, int goalCol) {
 
 		// define a State class in the method
 		class State {

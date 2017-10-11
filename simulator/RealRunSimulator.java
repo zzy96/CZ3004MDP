@@ -187,15 +187,27 @@ public class RealRunSimulator {
 				// initialization
 				map.setUnexplored();
 				robot = new Robot(true);
+				String waypoint[] = new String[2];
 
-				// while (true) {
-				// System.out.println("waiting for EX_START");
-				// // start from android
-				// if (connection.recvMsg().equals("EX_START")) {
-				// System.out.println("EX_START received");
-				// break;
-				// }
-				// }
+				while (true) {
+					System.out.println("waiting for waypoint...");
+					// start from android
+					String msg = connection.recvMsg();
+					if (msg.matches("[0-9]+,[0-9]+")) {
+						waypoint = msg.split(",");
+						System.out.println("waypoint: (" + waypoint[0] + "," + waypoint[1] + ")");
+						break;
+					}
+				}
+
+				while (true) {
+					System.out.println("waiting for EX_START");
+					// start from android
+					if (connection.recvMsg().equals("EX_START")) {
+						System.out.println("EX_START received");
+						break;
+					}
+				}
 
 				// send start command
 				connection.sendMsg("S", "BOT_START");
@@ -231,7 +243,7 @@ public class RealRunSimulator {
 							System.out.println(Exploration.hasMore(map));
 							while (Exploration.hasMore(map)) {
 								// go to unexplored
-								actions = fp.BFS(robot.direction, robot.row, robot.col, Exploration.rowToReach,
+								actions = fp.UCS(robot.direction, robot.row, robot.col, Exploration.rowToReach,
 										Exploration.colToReach);
 								fp.printPath(actions);
 								ACTION lastAction = actions.removeLast();
@@ -244,11 +256,12 @@ public class RealRunSimulator {
 									connection.sendMsg(fpString, "INSTR");
 								}
 
+								delay(500);
 								// update UI in fpString
 								for (int i = 0; i < actions.size(); i++) {
 									robot.act(actions.get(i));
 									updateDisplay(map, robot);
-									delay(300);
+									delay(400);
 								}
 
 								// second last step sense
@@ -273,7 +286,7 @@ public class RealRunSimulator {
 							System.out.println("reverse");
 							// go back start
 
-							actions = fp.BFS(robot.direction, robot.row, robot.col, RobotConstant.START_ROW,
+							actions = fp.UCS(robot.direction, robot.row, robot.col, RobotConstant.START_ROW,
 									RobotConstant.START_COL);
 							fp.printPath(actions);
 							if (actions.size() != 0) {
@@ -281,13 +294,14 @@ public class RealRunSimulator {
 								connection.sendMsg(fpString, "INSTR");
 							}
 
+							delay(500);
 							// display go home
 							for (int i = 0; i < actions.size(); i++) {
 								robot.act(actions.get(i));
 								updateDisplay(map, robot);
 								// lag to make robot looks like moving,
 								// delay in MS
-								delay(300);
+								delay(400);
 							}
 						}
 						break;
@@ -298,31 +312,15 @@ public class RealRunSimulator {
 
 				// start fastest path after exploration
 				connection.sendMsg("C", "INSTR");
-				String waypoint[] = new String[2];
-				waypoint[0] = "10";
-				waypoint[1] = "4";
-				delay(10000);
 
-				// while (true) {
-				// System.out.println("waiting for waypoint...");
-				// // start from android
-				// String msg = connection.recvMsg();
-				// if (msg.matches("[0-9]+,[0-9]+")) {
-				// waypoint = msg.split(",");
-				// System.out.println("waypoint: (" + waypoint[0] + "," +
-				// waypoint[1] + ")");
-				// break;
-				// }
-				// }
-				//
-				// while (true) {
-				// System.out.println("waiting for FP_START...");
-				// // start from android
-				// if (connection.recvMsg().equals("FP_START")) {
-				// System.out.println("FP_START received");
-				// break;
-				// }
-				// }
+				while (true) {
+					System.out.println("waiting for FP_START...");
+					// start from android
+					if (connection.recvMsg().equals("FP_START")) {
+						System.out.println("FP_START received");
+						break;
+					}
+				}
 
 				LinkedList<ACTION> actions = new LinkedList<ACTION>();
 				FastestPath fp;

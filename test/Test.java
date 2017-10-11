@@ -1,5 +1,7 @@
 package test;
 
+import java.util.concurrent.TimeUnit;
+
 import algorithm.FastestPath;
 import arena.Map;
 import configuration.RobotConstant;
@@ -10,20 +12,23 @@ public class Test {
 	public static void main(String[] args) {
 		Connection connection = Connection.getConnection();
 		connection.openConnection();
-		connection.sendMsg("ZLF03RF02", "INSTR");
+
 		// try {
 		// TimeUnit.MILLISECONDS.sleep(1000);
 		// } catch (Exception e) {
 		// e.printStackTrace();
 		// }
-		connection.sendMsg("F01", "INSTR");
-		connection.recvMsg();
-		connection.sendMsg("L", "INSTR");
+		connection.sendMsg("C", "INSTR");
+		try {
+			TimeUnit.MILLISECONDS.sleep(5000);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		connection.sendMsg("XLF05RF04LF11RF08LF01", "INSTR");
+		// connection.sendMsg("L", "INSTR");
 		// connection.sendMsg("abc", "BOT_POS");
 		// connection.sendMsg("hello", "BOT_POS");
 		// connection.sendMsg("hi", "BOT_POS");
-
-		connection.recvMsg();
 	}
 
 	private static String hexToBin(String hex) {
