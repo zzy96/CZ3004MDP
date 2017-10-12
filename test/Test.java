@@ -24,7 +24,7 @@ public class Test {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		connection.sendMsg("XLF05RF04LF11RF08LF01", "INSTR");
+		connection.sendMsg("XF03LF08RF06LF04RF02LF05RF01", "INSTR");
 		// connection.sendMsg("L", "INSTR");
 		// connection.sendMsg("abc", "BOT_POS");
 		// connection.sendMsg("hello", "BOT_POS");

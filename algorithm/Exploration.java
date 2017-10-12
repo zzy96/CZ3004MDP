@@ -33,7 +33,6 @@ public class Exploration {
 						break;
 					}
 				}
-				System.out.println("flag: " + flag);
 				if (flag) {
 					break;
 				}
@@ -205,14 +204,14 @@ public class Exploration {
 			rowToReach = row - 2;
 			colToReach = col;
 			return true;
-		} else if (row + 2 <= ArenaConstant.ROWS && map.explored[row + 2][col] && map.reachable[row + 2][col]
+		} else if (row + 2 < ArenaConstant.ROWS && map.explored[row + 2][col] && map.reachable[row + 2][col]
 				&& !map.blocked[row + 1][col])
 
 		{
 			rowToReach = row + 2;
 			colToReach = col;
 			return true;
-		} else if (col + 2 <= ArenaConstant.COLS && map.explored[row][col + 2] && map.reachable[row][col + 2]
+		} else if (col + 2 < ArenaConstant.COLS && map.explored[row][col + 2] && map.reachable[row][col + 2]
 				&& !map.blocked[row][col + 1])
 
 		{

@@ -18,6 +18,7 @@ import algorithm.FastestPath;
 import arena.Map;
 import configuration.RobotConstant;
 import configuration.RobotConstant.ACTION;
+import configuration.RobotConstant.DIRECTION;
 import connection.Connection;
 import robot.Robot;
 
@@ -310,6 +311,11 @@ public class RealRunSimulator {
 
 				System.out.println("Coverage percentage of exploration: " + map.coverage() + "%");
 
+				// robot direction to south
+				if (robot.direction == DIRECTION.WEST) {
+					connection.sendMsg("ZL", "INSTR");
+				}
+
 				// start fastest path after exploration
 				connection.sendMsg("C", "INSTR");
 
@@ -340,7 +346,7 @@ public class RealRunSimulator {
 				for (int i = 0; i < actions.size(); i++) {
 					robot.act(actions.get(i));
 					updateDisplay(map, robot);
-					delay(300);
+					delay(500);
 				}
 
 				return 111;
