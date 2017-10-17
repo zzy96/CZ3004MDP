@@ -27,10 +27,31 @@ public class Exploration {
 				if (canTurnRight(map, robot)) {
 					break;
 				}
-				for (int k = right_limit; k <= left_limit; k++) {
+				for (int k = robot.row + 2; k <= left_limit; k++) {
+					// System.out.println("check:(" + k + "," + (robot.col + 1)
+					// + ")");
 					if (!map.explored[k][robot.col + 1]) {
 						flag = true;
 						break;
+					} else {
+						if (map.blocked[k][robot.col + 1]) {
+							flag = false;
+							break;
+						}
+					}
+				}
+				// System.out.println("flag: " + flag);
+				if (!flag) {
+					for (int k = robot.row - 2; k >= right_limit; k--) {
+						if (!map.explored[k][robot.col + 1]) {
+							flag = true;
+							break;
+						} else {
+							if (map.blocked[k][robot.col + 1]) {
+								flag = false;
+								break;
+							}
+						}
 					}
 				}
 				if (flag) {
@@ -51,10 +72,28 @@ public class Exploration {
 				if (canTurnRight(map, robot)) {
 					break;
 				}
-				for (int k = right_limit; k <= left_limit; k++) {
+				for (int k = robot.col + 2; k <= left_limit; k++) {
 					if (!map.explored[robot.row - 1][k]) {
 						flag = true;
 						break;
+					} else {
+						if (map.blocked[robot.row - 1][k]) {
+							flag = false;
+							break;
+						}
+					}
+				}
+				if (!flag) {
+					for (int k = robot.col - 2; k >= right_limit; k--) {
+						if (!map.explored[robot.row - 1][k]) {
+							flag = true;
+							break;
+						} else {
+							if (map.blocked[robot.row - 1][k]) {
+								flag = false;
+								break;
+							}
+						}
 					}
 				}
 				if (flag) {
@@ -75,10 +114,28 @@ public class Exploration {
 				if (canTurnRight(map, robot)) {
 					break;
 				}
-				for (int k = right_limit; k >= left_limit; k--) {
+				for (int k = robot.row - 2; k >= left_limit; k--) {
 					if (!map.explored[k][robot.col - 1]) {
 						flag = true;
 						break;
+					} else {
+						if (map.blocked[k][robot.col - 1]) {
+							flag = false;
+							break;
+						}
+					}
+				}
+				if (!flag) {
+					for (int k = robot.row + 2; k <= right_limit; k++) {
+						if (!map.explored[k][robot.col - 1]) {
+							flag = true;
+							break;
+						} else {
+							if (map.blocked[k][robot.col - 1]) {
+								flag = false;
+								break;
+							}
+						}
 					}
 				}
 				if (flag) {
@@ -99,10 +156,28 @@ public class Exploration {
 				if (canTurnRight(map, robot)) {
 					break;
 				}
-				for (int k = right_limit; k >= left_limit; k--) {
+				for (int k = robot.col - 2; k >= left_limit; k--) {
 					if (!map.explored[robot.row + 1][k]) {
 						flag = true;
 						break;
+					} else {
+						if (map.blocked[robot.row + 1][k]) {
+							flag = false;
+							break;
+						}
+					}
+				}
+				if (!flag) {
+					for (int k = robot.col + 2; k <= right_limit; k++) {
+						if (!map.explored[robot.row + 1][k]) {
+							flag = true;
+							break;
+						} else {
+							if (map.blocked[robot.row + 1][k]) {
+								flag = false;
+								break;
+							}
+						}
 					}
 				}
 				if (flag) {

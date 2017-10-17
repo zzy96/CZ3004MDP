@@ -227,6 +227,7 @@ public class Map {
 		for (int row = ArenaConstant.ROWS - 1; row >= 0; row--) {
 			for (int col = 0; col < ArenaConstant.COLS; col++) {
 				explored[row][col] = false;
+				reachable[row][col] = false;
 			}
 		}
 	}

@@ -313,11 +313,35 @@ public class RealRunSimulator {
 
 				// robot direction to south
 				if (robot.direction == DIRECTION.WEST) {
-					connection.sendMsg("ZL", "INSTR");
+					connection.sendMsg("XL", "INSTR");
 				}
 
 				// start fastest path after exploration
 				connection.sendMsg("C", "INSTR");
+
+				LinkedList<ACTION> actions = new LinkedList<ACTION>();
+				FastestPath fp;
+
+				// way point
+				fp = new FastestPath(map, Integer.parseInt(waypoint[0]), Integer.parseInt(waypoint[1]),
+						RobotConstant.START_DIR);
+				robot.direction = RobotConstant.START_DIR;
+				fp.run();
+				actions = fp.getPath();
+				fp.printPath();
+
+				String fpString;
+				if (actions.getFirst() == ACTION.LEFT) {
+					connection.sendMsg("XL", "INSTR");
+					actions.removeFirst();
+					robot.act(ACTION.LEFT);
+					updateDisplay(map, robot);
+					fpString = generateFpString(actions, "X");
+					System.out.println(fpString);
+				} else {
+					fpString = generateFpString(actions, "X");
+					System.out.println(fpString);
+				}
 
 				while (true) {
 					System.out.println("waiting for FP_START...");
@@ -328,19 +352,6 @@ public class RealRunSimulator {
 					}
 				}
 
-				LinkedList<ACTION> actions = new LinkedList<ACTION>();
-				FastestPath fp;
-
-				// hard coded way point
-				fp = new FastestPath(map, Integer.parseInt(waypoint[0]), Integer.parseInt(waypoint[1]),
-						RobotConstant.START_DIR);
-				robot.direction = RobotConstant.START_DIR;
-				fp.run();
-				actions = fp.getPath();
-				fp.printPath();
-
-				String fpString = generateFpString(actions, "X");
-				System.out.println(fpString);
 				connection.sendMsg(fpString, "INSTR");
 
 				for (int i = 0; i < actions.size(); i++) {

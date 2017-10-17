@@ -351,7 +351,7 @@ public class Simulator {
 					robot.act(actions.get(i));
 					ui.update(map, robot);
 					ui.repaint(100);
-					updateAndroid(map, robot);
+					// updateAndroid(map, robot);
 
 					// lag to make robot looks like moving, delay in MS
 					try {
@@ -403,8 +403,8 @@ public class Simulator {
 				long endTime = System.currentTimeMillis() + timeLimit;
 
 				// for android test
-				connection = Connection.getConnection();
-				connection.openConnection();
+				// connection = Connection.getConnection();
+				// connection.openConnection();
 
 				map.setUnexplored();
 				robot = new Robot(false);
@@ -422,7 +422,7 @@ public class Simulator {
 					}
 					ui.printRobotPos();
 
-					updateAndroid(map, robot);
+					// updateAndroid(map, robot);
 
 					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL) {
 						if (map.coverage() != 100) {
