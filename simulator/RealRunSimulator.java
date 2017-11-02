@@ -189,6 +189,8 @@ public class RealRunSimulator {
 				map.setUnexplored();
 				robot = new Robot(true);
 				String waypoint[] = new String[2];
+				// waypoint[0] = "12";
+				// waypoint[1] = "10";
 
 				while (true) {
 					System.out.println("waiting for waypoint...");
@@ -222,8 +224,13 @@ public class RealRunSimulator {
 					robot = Exploration.nextMoveOptimized(map, robot);
 					updateArduino(Exploration.preAction, Exploration.instance);
 
+					// force go back start zone
 					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL + 1
 							&& robot.direction == DIRECTION.SOUTH) {
+						robot.sensorData = connection.recvMsg();
+						map = robot.updateMap(map);
+						updateDisplay(map, robot);
+
 						robot.act(ACTION.RIGHT);
 						Exploration.preAction = ACTION.RIGHT;
 						Exploration.instance = 1;

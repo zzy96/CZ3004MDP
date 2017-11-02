@@ -27,6 +27,7 @@ import algorithm.FastestPath;
 import arena.Map;
 import configuration.RobotConstant;
 import configuration.RobotConstant.ACTION;
+import configuration.RobotConstant.DIRECTION;
 import connection.Connection;
 import robot.Robot;
 
@@ -423,6 +424,36 @@ public class Simulator {
 					ui.printRobotPos();
 
 					// updateAndroid(map, robot);
+
+					// force go back start zone
+					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL + 1
+							&& robot.direction == DIRECTION.SOUTH) {
+
+						robot.act(ACTION.RIGHT);
+
+						map = robot.updateMap(map);
+						ui.update(map, robot);
+						ui.repaint(100);
+						try {
+							TimeUnit.MILLISECONDS.sleep(speed);
+						} catch (Exception er) {
+							er.printStackTrace();
+						}
+						ui.printRobotPos();
+
+						robot.act(ACTION.FORWARD);
+
+						map = robot.updateMap(map);
+						ui.update(map, robot);
+						ui.repaint(100);
+						try {
+							TimeUnit.MILLISECONDS.sleep(speed);
+						} catch (Exception er) {
+							er.printStackTrace();
+						}
+						ui.printRobotPos();
+
+					}
 
 					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL) {
 						if (map.coverage() != 100) {
