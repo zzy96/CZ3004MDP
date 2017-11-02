@@ -222,6 +222,24 @@ public class RealRunSimulator {
 					robot = Exploration.nextMoveOptimized(map, robot);
 					updateArduino(Exploration.preAction, Exploration.instance);
 
+					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL + 1
+							&& robot.direction == DIRECTION.SOUTH) {
+						robot.act(ACTION.RIGHT);
+						Exploration.preAction = ACTION.RIGHT;
+						Exploration.instance = 1;
+						updateArduino(Exploration.preAction, Exploration.instance);
+
+						robot.sensorData = connection.recvMsg();
+						map = robot.updateMap(map);
+						updateDisplay(map, robot);
+
+						robot.act(ACTION.FORWARD);
+						Exploration.preAction = ACTION.FORWARD;
+						Exploration.instance = 1;
+						updateArduino(Exploration.preAction, Exploration.instance);
+
+					}
+
 					// get back to start
 					if (robot.row == RobotConstant.START_ROW && robot.col == RobotConstant.START_COL) {
 
@@ -262,7 +280,7 @@ public class RealRunSimulator {
 								for (int i = 0; i < actions.size(); i++) {
 									robot.act(actions.get(i));
 									updateDisplay(map, robot);
-									delay(400);
+									delay(300);
 								}
 
 								// second last step sense
@@ -302,7 +320,7 @@ public class RealRunSimulator {
 								updateDisplay(map, robot);
 								// lag to make robot looks like moving,
 								// delay in MS
-								delay(400);
+								delay(350);
 							}
 						}
 						break;

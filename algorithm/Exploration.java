@@ -12,6 +12,9 @@ public class Exploration {
 	public static int instance = 1;
 	public static int rowToReach = RobotConstant.START_ROW;
 	public static int colToReach = RobotConstant.START_COL;
+	public static boolean necessaryFlag = false;
+	public static boolean forwardFlag = false;
+	public static boolean forwardOnceFlag = false;
 
 	public static int forwardInstance(Map map, Robot robot) {
 		int i = 1;
@@ -24,7 +27,7 @@ public class Exploration {
 			left_limit = Math.min(robot.row + 5, ArenaConstant.ROWS - 1);
 			right_limit = Math.max(robot.row - 3, 0);
 			while (true) {
-				if (canTurnRight(map, robot)) {
+				if (canTurnRight(map, robot) && rightTurnNecessary(map, robot)) {
 					break;
 				}
 				for (int k = robot.row + 2; k <= left_limit; k++) {
@@ -69,7 +72,7 @@ public class Exploration {
 			left_limit = Math.min(robot.col + 5, ArenaConstant.COLS - 1);
 			right_limit = Math.max(robot.col - 3, 0);
 			while (true) {
-				if (canTurnRight(map, robot)) {
+				if (canTurnRight(map, robot) && rightTurnNecessary(map, robot)) {
 					break;
 				}
 				for (int k = robot.col + 2; k <= left_limit; k++) {
@@ -111,7 +114,7 @@ public class Exploration {
 			left_limit = Math.max(robot.row - 5, 0);
 			right_limit = Math.min(robot.row + 3, ArenaConstant.ROWS - 1);
 			while (true) {
-				if (canTurnRight(map, robot)) {
+				if (canTurnRight(map, robot) && rightTurnNecessary(map, robot)) {
 					break;
 				}
 				for (int k = robot.row - 2; k >= left_limit; k--) {
@@ -153,7 +156,7 @@ public class Exploration {
 			left_limit = Math.max(robot.col - 5, 0);
 			right_limit = Math.min(robot.col + 3, ArenaConstant.COLS - 1);
 			while (true) {
-				if (canTurnRight(map, robot)) {
+				if (canTurnRight(map, robot) && rightTurnNecessary(map, robot)) {
 					break;
 				}
 				for (int k = robot.col - 2; k >= left_limit; k--) {
@@ -195,26 +198,114 @@ public class Exploration {
 		return i;
 	}
 
+	public static boolean onBoundary(Map map, Robot robot) {
+		switch (robot.direction) {
+		case NORTH:
+			if (robot.row + 2 >= ArenaConstant.ROWS) {
+				return true;
+			}
+			break;
+		case SOUTH:
+			if (robot.row - 2 < 0) {
+				return true;
+			}
+			break;
+		case EAST:
+			if (robot.col + 2 < 0) {
+				return true;
+			}
+			break;
+		case WEST:
+			if (robot.col - 2 < 0) {
+				return true;
+			}
+			break;
+		}
+		return false;
+	}
+
+	// check if it that action is necessary
+	public static boolean rightTurnNecessary(Map map, Robot robot) {
+
+		switch (robot.direction) {
+		case NORTH:
+			for (int i = robot.row - 1; i <= robot.row + 1; i++) {
+				if (map.isBlocked(i, robot.col + 3)) {
+					return false;
+				}
+			}
+			break;
+		case SOUTH:
+			for (int i = robot.row - 1; i <= robot.row + 1; i++) {
+				if (map.isBlocked(i, robot.col - 3)) {
+					return false;
+				}
+			}
+			break;
+		case EAST:
+			for (int i = robot.col - 1; i <= robot.col + 1; i++) {
+				if (map.isBlocked(robot.row - 3, i)) {
+					return false;
+				}
+			}
+			break;
+		case WEST:
+			for (int i = robot.col - 1; i <= robot.col + 1; i++) {
+				if (map.isBlocked(robot.row + 3, i)) {
+					return false;
+				}
+			}
+			break;
+		}
+		return true;
+
+	}
+
 	public static Robot nextMoveOptimized(Map map, Robot robot) {
-		if (preAction != ACTION.RIGHT && canTurnRight(map, robot)) {
+		if (forwardOnceFlag) {
+			robot.act(ACTION.FORWARD);
+			instance = 1;
+			System.out.println("force move once!");
+			System.out.println("instance: " + instance);
+			preAction = ACTION.FORWARD;
+			forwardOnceFlag = false;
+		} else if (forwardFlag) {
+			instance = forwardInstance(map, robot);
+			System.out.println("force move!");
+			System.out.println("instance: " + instance);
+			preAction = ACTION.FORWARD;
+			forwardFlag = false;
+		} else if (preAction != ACTION.RIGHT && canTurnRight(map, robot) && rightTurnNecessary(map, robot)) {
 			System.out.println("instance: " + instance);
 			instance = 1;
 			robot.act(ACTION.RIGHT);
 			preAction = ACTION.RIGHT;
+			if (necessaryFlag) {
+				forwardOnceFlag = true;
+				forwardFlag = true;
+				necessaryFlag = false;
+			}
 		} else if (canMoveForward(map, robot)) {
+			if (preAction != ACTION.RIGHT && canTurnRight(map, robot)) {
+				necessaryFlag = true;
+			} else {
+				necessaryFlag = false;
+			}
 			instance = forwardInstance(map, robot);
 			System.out.println("instance: " + instance);
 			preAction = ACTION.FORWARD;
-		} else if (canTurnRight(map, robot)) {
+		} else if (canTurnRight(map, robot) && !onBoundary(map, robot)) {
 			System.out.println("instance: " + instance);
 			instance = 1;
 			robot.act(ACTION.RIGHT);
 			preAction = ACTION.RIGHT;
+			necessaryFlag = false;
 		} else {
 			System.out.println("instance: " + instance);
 			instance = 1;
 			robot.act(ACTION.LEFT);
 			preAction = ACTION.LEFT;
+			necessaryFlag = false;
 		}
 		System.out.println(preAction);
 		return robot;
@@ -317,27 +408,23 @@ public class Exploration {
 		case NORTH:
 			if (robot.col + 1 < ArenaConstant.COLS && checkReachable(map, robot.row, robot.col + 1)) {
 				return true;
-			} else {
-				return false;
 			}
+			break;
 		case EAST:
 			if (robot.row - 1 > 0 && checkReachable(map, robot.row - 1, robot.col)) {
 				return true;
-			} else {
-				return false;
 			}
+			break;
 		case SOUTH:
 			if (robot.col - 1 > 0 && checkReachable(map, robot.row, robot.col - 1)) {
 				return true;
-			} else {
-				return false;
 			}
+			break;
 		case WEST:
 			if (robot.row + 1 < ArenaConstant.ROWS && checkReachable(map, robot.row + 1, robot.col)) {
 				return true;
-			} else {
-				return false;
 			}
+			break;
 		}
 		return false;
 	}

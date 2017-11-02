@@ -10,8 +10,8 @@ public class RobotConstant {
 	public static final int START_COL = 1;
 	// col no. of start cell
 	public static final int MOVE_COST = 10;
-	// cost of FORWARD, BACKWARD movement
-	public static final int TURN_COST = 25;
+	// cost of FORWARD movement
+	public static final int TURN_COST = 20;
 	// cost of RIGHT, LEFT movement
 	public static final int SPEED = 500;
 	public static final int TIMELIMIT = 1000000;
